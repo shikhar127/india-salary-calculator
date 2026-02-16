@@ -1,0 +1,20 @@
+{
+  "name": "india-salary-calculator",
+  "version": "1.0.0",
+  "description": "India Salary Calculator - CTC to in-hand salary calculator with tax regime comparison, hike calculator, offer comparison, and reverse calculator for Indian tax system (FY 2025-26)",
+  "main": "www/index.html",
+  "scripts": {
+    "start": "npx serve www",
+    "build:android": "npx cap sync android && cd android && ./gradlew assembleRelease"
+  },
+  "keywords": ["salary", "calculator", "india", "tax", "ctc", "in-hand", "hra", "epf"],
+  "author": "shikhar127",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
