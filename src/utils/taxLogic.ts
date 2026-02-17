@@ -17,8 +17,9 @@ export const calcPF = (annualBasic: number): number => {
 export const calculateTax = (
   income: number,
   regime: 'old' | 'new',
+  slabsOverride?: { limit: number; rate: number }[],
 ): TaxResult => {
-  const slabs = regime === 'new' ? NEW_REGIME_SLABS : OLD_REGIME_SLABS
+  const slabs = slabsOverride ?? (regime === 'new' ? NEW_REGIME_SLABS : OLD_REGIME_SLABS)
   const standardDeduction = regime === 'new' ? 75000 : 50000
 
   const taxableIncome = Math.max(0, income - standardDeduction)

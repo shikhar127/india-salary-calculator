@@ -1,22 +1,28 @@
 import React, { useState } from 'react'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
+import { Select } from '../ui/Select'
+import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { formatIndianCurrency } from '../../utils/formatting'
 import { calculateTax, calcPF } from '../../utils/taxLogic'
+import { STATES } from '../../utils/constants'
 import { TrendingUp } from 'lucide-react'
 
 export function HikeCompare() {
   const [currentCtc, setCurrentCtc] = useState<number>(1200000)
   const [hikePercent, setHikePercent] = useState<number>(30)
+  const [selectedState, setSelectedState] = useState<string>('Maharashtra')
+  const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
 
   const calcInHand = (ctc: number): number => {
     const basic = ctc * 0.5
-    const employerPF = calcPF(basic)
-    const gratuity = basic * 0.0481
-    const gross = ctc - employerPF - gratuity
-    const employeePF = calcPF(basic)
-    const pt = 2500
+    const employerPF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
+    // Gratuity treated as separate — not deducted from gross
+    const gross = ctc - employerPF
+    const employeePF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
+    const stateData = STATES.find((s) => s.name === selectedState) || STATES[0]
+    const pt = stateData.pt
     const tax = calculateTax(gross, 'new').totalTax
     return (gross - employeePF - pt - tax) / 12
   }
@@ -66,6 +72,21 @@ export function HikeCompare() {
             value={hikePercent}
             onChange={(e) => setHikePercent(Number(e.target.value))}
           />
+          <Select
+            label="State"
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+            options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+          />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-2">PF Calculation</p>
+            <Toggle
+              value={pfMode === 'full'}
+              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+              leftLabel="Statutory cap (₹1,800/mo)"
+              rightLabel="12% of full basic"
+            />
+          </div>
         </div>
       </Card>
 
@@ -80,7 +101,7 @@ export function HikeCompare() {
 
       <div className="bg-bg-secondary p-4 rounded-xl">
         <p className="text-xs text-secondary text-center">
-          *Estimates based on New Tax Regime FY 2025-26, 50% basic, statutory PF cap. Actual in-hand may vary.
+          *Estimates based on New Tax Regime FY 2025-26, 50% basic. Actual in-hand may vary.
         </p>
       </div>
     </div>

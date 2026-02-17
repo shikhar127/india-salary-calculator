@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
+import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { calculateTax, calculateHRAExemption } from '../../utils/taxLogic'
+import {
+  SENIOR_OLD_REGIME_SLABS,
+  VERY_SENIOR_OLD_REGIME_SLABS,
+} from '../../utils/constants'
 import { CheckCircle2 } from 'lucide-react'
+
+type AgeGroup = 'below60' | '60to79' | '80plus'
 
 export function TaxDeductions() {
   const [income, setIncome] = useState<number>(1500000)
@@ -15,17 +22,35 @@ export function TaxDeductions() {
   const [basicSalary, setBasicSalary] = useState<number>(750000)
   const [isMetro, setIsMetro] = useState<boolean>(true)
   const [nps, setNps] = useState<number>(50000)
+  const [employerNps, setEmployerNps] = useState<number>(0)
+  const [ageGroup, setAgeGroup] = useState<AgeGroup>('below60')
   const [comparison, setComparison] = useState<any>(null)
 
+  const ded80DMax = ageGroup === 'below60' ? 25000 : 50000
+
   useEffect(() => {
-    const newRegimeResult = calculateTax(income, 'new')
+    const dedEmployerNps = Math.min(employerNps, basicSalary * 0.10)
+
+    // New regime: 80CCD(2) employer NPS is deductible even in new regime
+    const newRegimeIncome = Math.max(0, income - dedEmployerNps)
+    const newRegimeResult = calculateTax(newRegimeIncome, 'new')
+
     const hraExemption = calculateHRAExemption(basicSalary, hraReceived, rentPaid, isMetro)
     const ded80C = Math.min(section80C, 150000)
-    const ded80D = Math.min(section80D, 25000)
+    const ded80D = Math.min(section80D, ded80DMax)
     const dedNPS = Math.min(nps, 50000)
-    const totalExemptions = hraExemption + ded80C + ded80D + dedNPS
+    const totalExemptions = hraExemption + ded80C + ded80D + dedNPS + dedEmployerNps
     const oldRegimeTaxable = Math.max(0, income - totalExemptions)
-    const oldRegimeResult = calculateTax(oldRegimeTaxable, 'old')
+
+    // Pick old regime slabs based on age
+    const oldSlabs =
+      ageGroup === '80plus'
+        ? VERY_SENIOR_OLD_REGIME_SLABS
+        : ageGroup === '60to79'
+        ? SENIOR_OLD_REGIME_SLABS
+        : undefined
+
+    const oldRegimeResult = calculateTax(oldRegimeTaxable, 'old', oldSlabs)
 
     setComparison({
       new: newRegimeResult,
@@ -33,7 +58,7 @@ export function TaxDeductions() {
       savings: Math.abs(newRegimeResult.totalTax - oldRegimeResult.totalTax),
       better: newRegimeResult.totalTax < oldRegimeResult.totalTax ? 'new' : 'old',
     })
-  }, [income, section80C, section80D, hraReceived, rentPaid, basicSalary, isMetro, nps])
+  }, [income, section80C, section80D, hraReceived, rentPaid, basicSalary, isMetro, nps, employerNps, ageGroup])
 
   if (!comparison) return null
 
@@ -83,7 +108,7 @@ export function TaxDeductions() {
           </Card>
         </div>
 
-        {/* Income Input */}
+        {/* Income & Profile */}
         <h3 className="text-lg font-bold mb-3">Income Details</h3>
         <Card className="space-y-4 mb-6">
           <Input
@@ -93,13 +118,23 @@ export function TaxDeductions() {
             value={income}
             onChange={(e) => setIncome(Number(e.target.value))}
           />
+          <Select
+            label="Age Group"
+            value={ageGroup}
+            onChange={(e) => setAgeGroup(e.target.value as AgeGroup)}
+            options={[
+              { label: 'Below 60', value: 'below60' },
+              { label: '60–79 (Senior Citizen)', value: '60to79' },
+              { label: '80+ (Very Senior)', value: '80plus' },
+            ]}
+          />
         </Card>
 
         {/* Deductions */}
-        <h3 className="text-lg font-bold mb-3">Deductions (Old Regime)</h3>
+        <h3 className="text-lg font-bold mb-3">Deductions</h3>
         <Card className="space-y-4">
-          <div className="bg-bg-secondary p-3 rounded-lg mb-4">
-            <p className="text-xs text-secondary mb-2">HRA Calculation Params</p>
+          <div className="bg-bg-secondary p-3 rounded-lg">
+            <p className="text-xs text-secondary mb-2">HRA Exemption (Old Regime)</p>
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Basic Salary"
@@ -135,19 +170,27 @@ export function TaxDeductions() {
             suffix="/ 1.5L"
           />
           <Input
-            label="Section 80D (Health Ins)"
+            label={`Section 80D (Health Ins) — max ₹${(ded80DMax / 1000).toFixed(0)}k`}
             prefix="₹"
             type="number"
             value={section80D}
             onChange={(e) => setSection80D(Number(e.target.value))}
           />
           <Input
-            label="NPS (80CCD 1B)"
+            label="NPS Employee (80CCD 1B)"
             prefix="₹"
             type="number"
             value={nps}
             onChange={(e) => setNps(Number(e.target.value))}
             suffix="/ 50k"
+          />
+          <Input
+            label="Employer NPS (80CCD 2) — both regimes"
+            prefix="₹"
+            type="number"
+            value={employerNps}
+            onChange={(e) => setEmployerNps(Number(e.target.value))}
+            suffix={`/ ${((basicSalary * 0.1) / 1000).toFixed(0)}k`}
           />
         </Card>
       </div>

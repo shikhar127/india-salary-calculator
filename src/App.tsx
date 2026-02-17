@@ -1,4 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, Component } from 'react'
+
+class ErrorBoundary extends Component<{children: React.ReactNode}, {error: string | null}> {
+  constructor(props: any) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(e: Error) { return { error: e.message + '\n' + e.stack } }
+  render() {
+    if (this.state.error) return <pre style={{padding:16,color:'red',fontSize:12,whiteSpace:'pre-wrap'}}>{this.state.error}</pre>
+    return this.props.children
+  }
+}
 import { Calculator, FileText, TrendingUp, RotateCcw } from 'lucide-react'
 import { SalaryCalculator } from './components/tabs/SalaryCalculator'
 import { TaxDeductions } from './components/tabs/TaxDeductions'
@@ -75,4 +84,4 @@ function NavButton({ active, onClick, icon, label }: {
   )
 }
 
-export { App }
+export { App, ErrorBoundary }

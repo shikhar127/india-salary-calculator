@@ -32,3 +32,18 @@ export const OLD_REGIME_SLABS = [
   { limit: 1000000, rate: 0.20 },
   { limit: Infinity, rate: 0.30 },
 ]
+
+// Senior citizen (60–79 yrs): basic exemption ₹3L
+export const SENIOR_OLD_REGIME_SLABS = [
+  { limit: 300000, rate: 0 },
+  { limit: 500000, rate: 0.05 },
+  { limit: 1000000, rate: 0.20 },
+  { limit: Infinity, rate: 0.30 },
+]
+
+// Very senior citizen (80+ yrs): basic exemption ₹5L, no 5% slab
+export const VERY_SENIOR_OLD_REGIME_SLABS = [
+  { limit: 500000, rate: 0 },
+  { limit: 1000000, rate: 0.20 },
+  { limit: Infinity, rate: 0.30 },
+]

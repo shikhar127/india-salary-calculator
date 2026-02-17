@@ -2,27 +2,28 @@ import React, { useState } from 'react'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
 import { Button } from '../ui/Button'
+import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { formatIndianCurrency } from '../../utils/formatting'
 import { calculateTax, calcPF } from '../../utils/taxLogic'
 
 export function ReverseCalculator() {
   const [targetInHand, setTargetInHand] = useState<number>(100000)
+  const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [result, setResult] = useState<{ ctc: number; tax: number; pf: number } | null>(null)
 
   const calculateRequiredCTC = () => {
     const targetAnnualNet = targetInHand * 12
-    // Upper bound: net is at most ~65% of CTC after tax+PF+PT, so CTC < net * 2.5 covers all cases
     let low = targetAnnualNet
     let high = targetAnnualNet * 2.5
     let ctc = (low + high) / 2
 
     const getNet = (c: number) => {
       const basic = c * 0.5
-      const employerPF = calcPF(basic)
-      const gratuity = basic * 0.0481
-      const gross = c - employerPF - gratuity
-      const employeePF = calcPF(basic)
+      const employerPF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
+      // Gratuity treated as separate — not deducted from gross
+      const gross = c - employerPF
+      const employeePF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
       const pt = 2500
       const tax = calculateTax(gross, 'new').totalTax
       return gross - employeePF - pt - tax
@@ -40,14 +41,13 @@ export function ReverseCalculator() {
     }
 
     const basic = ctc * 0.5
-    const employerPF = calcPF(basic)
-    const gratuity = basic * 0.0481
-    const gross = ctc - employerPF - gratuity
+    const employerPF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
+    const gross = ctc - employerPF
 
     setResult({
       ctc,
       tax: calculateTax(gross, 'new').totalTax,
-      pf: calcPF(basic),
+      pf: pfMode === 'capped' ? calcPF(basic) : basic * 0.12,
     })
   }
 
@@ -67,6 +67,15 @@ export function ReverseCalculator() {
             value={targetInHand}
             onChange={(e) => setTargetInHand(Number(e.target.value))}
           />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-2">PF Calculation</p>
+            <Toggle
+              value={pfMode === 'full'}
+              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+              leftLabel="Statutory cap (₹1,800/mo)"
+              rightLabel="12% of full basic"
+            />
+          </div>
           <Button fullWidth onClick={calculateRequiredCTC}>
             Calculate Required CTC
           </Button>
@@ -90,7 +99,9 @@ export function ReverseCalculator() {
                 <span className="display-sm font-semibold">{formatIndianCurrency(result.tax)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-secondary">Provident Fund (statutory cap)</span>
+                <span className="text-secondary">
+                  Provident Fund {pfMode === 'capped' ? '(statutory cap)' : '(12% of basic)'}
+                </span>
                 <span className="display-sm font-semibold">{formatIndianCurrency(result.pf)}</span>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { Share2, Download } from 'lucide-react'
+import { Share2, Download, Info } from 'lucide-react'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
@@ -19,23 +19,24 @@ export function SalaryCalculator() {
   const [variablePay, setVariablePay] = useState<number>(0)
   const [isMetro, setIsMetro] = useState<boolean>(true)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [showAnnual, setShowAnnual] = useState<boolean>(false)
+  const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [results, setResults] = useState<any>(null)
 
   useEffect(() => {
     calculateSalary()
-  }, [ctc, basicPercent, variablePay, isMetro, selectedState])
+  }, [ctc, basicPercent, variablePay, isMetro, selectedState, pfMode])
 
   const calculateSalary = () => {
     const annualBasic = (ctc * basicPercent) / 100
     const annualHRA = annualBasic * (isMetro ? 0.5 : 0.4)
 
-    // EPF capped at 12% of ₹15,000/month (statutory wage ceiling)
-    const annualEmployerPF = calcPF(annualBasic)
-    const annualGratuity = annualBasic * 0.0481
-    const annualGross = ctc - annualEmployerPF - annualGratuity
+    const annualEmployerPF = pfMode === 'capped' ? calcPF(annualBasic) : annualBasic * 0.12
+    // Gratuity is treated as a separate cost — not deducted from gross
+    const annualGross = ctc - annualEmployerPF
     const annualSpecial = Math.max(0, annualGross - annualBasic - annualHRA - variablePay)
-    const annualEmployeePF = calcPF(annualBasic)
+    const annualEmployeePF = pfMode === 'capped' ? calcPF(annualBasic) : annualBasic * 0.12
 
     const stateData = STATES.find((s) => s.name === selectedState) || STATES[0]
     const annualPT = stateData.pt
@@ -44,7 +45,6 @@ export function SalaryCalculator() {
     const annualEmployeeESI = monthlyGross <= 21000 ? annualGross * 0.0075 : 0
     const annualEmployerESI = monthlyGross <= 21000 ? annualGross * 0.0325 : 0
 
-    // Fix: PT is NOT deductible in new regime — pass gross directly
     const { totalTax: annualTax } = calculateTax(annualGross, 'new')
 
     const annualDeductions = annualEmployeePF + annualPT + annualEmployeeESI + annualTax
@@ -60,7 +60,6 @@ export function SalaryCalculator() {
       annualGross,
       annualEmployeePF,
       annualEmployerPF,
-      annualGratuity,
       annualPT,
       annualTax,
       annualDeductions,
@@ -108,9 +107,8 @@ export function SalaryCalculator() {
   const chartData = [
     { name: 'In-Hand', value: results.annualInHand },
     { name: 'Tax', value: results.annualTax },
-    // ESI merged into PF & Other so chart adds up correctly
     { name: 'PF & Other', value: results.annualEmployeePF + results.annualPT + results.annualEmployeeESI },
-    { name: 'Employer Contrib', value: results.annualEmployerPF + results.annualGratuity + results.annualEmployerESI },
+    { name: 'Employer Contrib', value: results.annualEmployerPF + results.annualEmployerESI },
   ]
 
   return (
@@ -163,23 +161,43 @@ export function SalaryCalculator() {
               onChange={(e) => setVariablePay(Number(e.target.value))}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label="City Type"
-              value={isMetro ? 'metro' : 'non-metro'}
-              onChange={(e) => setIsMetro(e.target.value === 'metro')}
-              options={[
-                { label: 'Metro', value: 'metro' },
-                { label: 'Non-Metro', value: 'non-metro' },
-              ]}
-            />
-            <Select
-              label="State"
-              value={selectedState}
-              onChange={(e) => setSelectedState(e.target.value)}
-              options={STATES.map((s) => ({ label: s.name, value: s.name }))}
-            />
-          </div>
+          <button
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1"
+          >
+            <span>More Options</span>
+            <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
+          </button>
+          {showAdvanced && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="City Type"
+                  value={isMetro ? 'metro' : 'non-metro'}
+                  onChange={(e) => setIsMetro(e.target.value === 'metro')}
+                  options={[
+                    { label: 'Metro', value: 'metro' },
+                    { label: 'Non-Metro', value: 'non-metro' },
+                  ]}
+                />
+                <Select
+                  label="State"
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
+                  options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+                />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-2">PF Calculation</p>
+                <Toggle
+                  value={pfMode === 'full'}
+                  onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+                  leftLabel="Statutory cap (₹1,800/mo)"
+                  rightLabel="12% of full basic"
+                />
+              </div>
+            </>
+          )}
         </div>
       </Card>
 
@@ -189,9 +207,13 @@ export function SalaryCalculator() {
         <Card className="space-y-3">
           <BreakdownRow label="Basic Salary" value={results.annualBasic} showAnnual={showAnnual} />
           <BreakdownRow label="HRA" value={results.annualHRA} showAnnual={showAnnual} />
-          <BreakdownRow label="Special Allowance" value={results.annualSpecial} showAnnual={showAnnual} />
+          <BreakdownRow
+            label="Special Allowance"
+            value={results.annualSpecial}
+            showAnnual={showAnnual}
+            info="Whatever's left after allocating Basic, HRA, and Variable Pay from Gross. Most companies park unallocated amounts here."
+          />
           {variablePay > 0 && (
-            // Variable pay is an annual lump sum — always show annual, label clarifies in monthly view
             <BreakdownRow
               label={showAnnual ? 'Variable Pay' : 'Variable Pay (annual)'}
               value={variablePay}
@@ -267,20 +289,38 @@ function BreakdownRow({
   showAnnual,
   bold = false,
   danger = false,
+  info,
 }: {
   label: string
   value: number
   showAnnual: boolean
   bold?: boolean
   danger?: boolean
+  info?: string
 }) {
+  const [showInfo, setShowInfo] = useState(false)
   const displayVal = showAnnual ? value : value / 12
   return (
-    <div className="flex justify-between items-center py-0.5">
-      <span className={`text-sm ${bold ? 'font-bold text-primary' : 'text-secondary font-medium'}`}>
-        {label}
-      </span>
-      <RowAmount amount={displayVal} bold={bold} danger={danger} />
+    <div className="py-0.5">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-1.5">
+          <span className={`text-sm ${bold ? 'font-bold text-primary' : 'text-secondary font-medium'}`}>
+            {label}
+          </span>
+          {info && (
+            <button
+              onClick={() => setShowInfo((v) => !v)}
+              className="text-secondary opacity-50 hover:opacity-100 transition-opacity"
+            >
+              <Info className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <RowAmount amount={displayVal} bold={bold} danger={danger} />
+      </div>
+      {info && showInfo && (
+        <p className="text-xs text-secondary mt-1.5 leading-relaxed">{info}</p>
+      )}
     </div>
   )
 }
