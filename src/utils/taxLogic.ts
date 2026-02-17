@@ -8,7 +8,16 @@ export interface TaxResult {
   breakdown: { slab: string; amount: number }[]
 }
 
-export const calculateTax = (income: number, regime: 'old' | 'new'): TaxResult => {
+// EPF is capped at 12% of ₹15,000/month (statutory wage ceiling = ₹1,800/mo = ₹21,600/yr)
+export const calcPF = (annualBasic: number): number => {
+  const monthlyBasic = annualBasic / 12
+  return Math.min(monthlyBasic, 15000) * 0.12 * 12
+}
+
+export const calculateTax = (
+  income: number,
+  regime: 'old' | 'new',
+): TaxResult => {
   const slabs = regime === 'new' ? NEW_REGIME_SLABS : OLD_REGIME_SLABS
   const standardDeduction = regime === 'new' ? 75000 : 50000
 
@@ -46,6 +55,14 @@ export const calculateTax = (income: number, regime: 'old' | 'new'): TaxResult =
   }
 
   tax = Math.max(0, tax - rebate)
+
+  // Marginal relief (new regime): tax must not exceed income above the ₹12L rebate threshold
+  // Prevents the cliff where earning ₹1 more causes ₹60k+ extra tax
+  if (regime === 'new' && taxableIncome > 1200000) {
+    const excess = taxableIncome - 1200000
+    if (tax > excess) tax = excess
+  }
+
   const cess = tax * 0.04
   const totalTax = tax + cess
 

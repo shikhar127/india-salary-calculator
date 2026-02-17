@@ -4,7 +4,7 @@ import { Input } from '../ui/Input'
 import { Button } from '../ui/Button'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { formatIndianCurrency } from '../../utils/formatting'
-import { calculateTax } from '../../utils/taxLogic'
+import { calculateTax, calcPF } from '../../utils/taxLogic'
 
 export function ReverseCalculator() {
   const [targetInHand, setTargetInHand] = useState<number>(100000)
@@ -12,19 +12,26 @@ export function ReverseCalculator() {
 
   const calculateRequiredCTC = () => {
     const targetAnnualNet = targetInHand * 12
+    // Upper bound: net is at most ~65% of CTC after tax+PF+PT, so CTC < net * 2.5 covers all cases
     let low = targetAnnualNet
-    let high = targetAnnualNet * 2
+    let high = targetAnnualNet * 2.5
     let ctc = (low + high) / 2
 
-    for (let i = 0; i < 20; i++) {
-      ctc = (low + high) / 2
-      const tax = calculateTax(ctc, 'new').totalTax
+    const getNet = (c: number) => {
+      const basic = c * 0.5
+      const employerPF = calcPF(basic)
+      const gratuity = basic * 0.0481
+      const gross = c - employerPF - gratuity
+      const employeePF = calcPF(basic)
       const pt = 2500
-      const pf = ctc * 0.5 * 0.12
-      const net = ctc - tax - pt - pf
+      const tax = calculateTax(gross, 'new').totalTax
+      return gross - employeePF - pt - tax
+    }
 
+    for (let i = 0; i < 25; i++) {
+      ctc = (low + high) / 2
+      const net = getNet(ctc)
       if (Math.abs(net - targetAnnualNet) < 100) break
-
       if (net < targetAnnualNet) {
         low = ctc
       } else {
@@ -32,10 +39,15 @@ export function ReverseCalculator() {
       }
     }
 
+    const basic = ctc * 0.5
+    const employerPF = calcPF(basic)
+    const gratuity = basic * 0.0481
+    const gross = ctc - employerPF - gratuity
+
     setResult({
       ctc,
-      tax: calculateTax(ctc, 'new').totalTax,
-      pf: ctc * 0.5 * 0.12,
+      tax: calculateTax(gross, 'new').totalTax,
+      pf: calcPF(basic),
     })
   }
 
@@ -71,14 +83,14 @@ export function ReverseCalculator() {
           </div>
 
           <Card className="bg-bg-secondary border-transparent">
-            <h3 className="font-bold mb-3 text-sm">Estimated Deductions</h3>
+            <h3 className="font-bold mb-3 text-sm">Estimated Deductions (New Regime)</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-secondary">Income Tax (New Regime)</span>
+                <span className="text-secondary">Income Tax</span>
                 <span className="display-sm font-semibold">{formatIndianCurrency(result.tax)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-secondary">Provident Fund (12%)</span>
+                <span className="text-secondary">Provident Fund (statutory cap)</span>
                 <span className="display-sm font-semibold">{formatIndianCurrency(result.pf)}</span>
               </div>
             </div>

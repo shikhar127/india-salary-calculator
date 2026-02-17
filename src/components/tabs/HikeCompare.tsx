@@ -3,19 +3,28 @@ import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { formatIndianCurrency } from '../../utils/formatting'
-import { calculateTax } from '../../utils/taxLogic'
+import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { TrendingUp } from 'lucide-react'
 
 export function HikeCompare() {
   const [currentCtc, setCurrentCtc] = useState<number>(1200000)
   const [hikePercent, setHikePercent] = useState<number>(30)
 
+  const calcInHand = (ctc: number): number => {
+    const basic = ctc * 0.5
+    const employerPF = calcPF(basic)
+    const gratuity = basic * 0.0481
+    const gross = ctc - employerPF - gratuity
+    const employeePF = calcPF(basic)
+    const pt = 2500
+    const tax = calculateTax(gross, 'new').totalTax
+    return (gross - employeePF - pt - tax) / 12
+  }
+
   const calculateHike = () => {
     const newCtc = currentCtc * (1 + hikePercent / 100)
-    const currentTax = calculateTax(currentCtc, 'new').totalTax
-    const currentInHand = (currentCtc - currentTax - 2500) / 12
-    const newTax = calculateTax(newCtc, 'new').totalTax
-    const newInHand = (newCtc - newTax - 2500) / 12
+    const currentInHand = calcInHand(currentCtc)
+    const newInHand = calcInHand(newCtc)
     return { newCtc, currentInHand, newInHand, diff: newInHand - currentInHand }
   }
 
@@ -71,7 +80,7 @@ export function HikeCompare() {
 
       <div className="bg-bg-secondary p-4 rounded-xl">
         <p className="text-xs text-secondary text-center">
-          *Estimates based on New Tax Regime FY 2025-26. Actual in-hand may vary based on PF and other deductions.
+          *Estimates based on New Tax Regime FY 2025-26, 50% basic, statutory PF cap. Actual in-hand may vary.
         </p>
       </div>
     </div>

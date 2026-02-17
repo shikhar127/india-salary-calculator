@@ -21,7 +21,7 @@ export function TaxDeductions() {
     const newRegimeResult = calculateTax(income, 'new')
     const hraExemption = calculateHRAExemption(basicSalary, hraReceived, rentPaid, isMetro)
     const ded80C = Math.min(section80C, 150000)
-    const ded80D = Math.min(section80D, 100000)
+    const ded80D = Math.min(section80D, 25000)
     const dedNPS = Math.min(nps, 50000)
     const totalExemptions = hraExemption + ded80C + ded80D + dedNPS
     const oldRegimeTaxable = Math.max(0, income - totalExemptions)

@@ -9,7 +9,7 @@ import { Toggle } from '../ui/Toggle'
 import { DisplayAmount, RowAmount } from '../ui/DisplayAmount'
 import { STATES } from '../../utils/constants'
 import { formatIndianCurrency } from '../../utils/formatting'
-import { calculateTax } from '../../utils/taxLogic'
+import { calculateTax, calcPF } from '../../utils/taxLogic'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
 
@@ -29,17 +29,25 @@ export function SalaryCalculator() {
   const calculateSalary = () => {
     const annualBasic = (ctc * basicPercent) / 100
     const annualHRA = annualBasic * (isMetro ? 0.5 : 0.4)
-    const annualEmployerPF = annualBasic * 0.12
+
+    // EPF capped at 12% of ₹15,000/month (statutory wage ceiling)
+    const annualEmployerPF = calcPF(annualBasic)
     const annualGratuity = annualBasic * 0.0481
     const annualGross = ctc - annualEmployerPF - annualGratuity
     const annualSpecial = Math.max(0, annualGross - annualBasic - annualHRA - variablePay)
-    const annualEmployeePF = annualBasic * 0.12
+    const annualEmployeePF = calcPF(annualBasic)
+
     const stateData = STATES.find((s) => s.name === selectedState) || STATES[0]
     const annualPT = stateData.pt
+
     const monthlyGross = annualGross / 12
-    const annualESI = monthlyGross <= 21000 ? annualGross * 0.0075 : 0
-    const { totalTax: annualTax } = calculateTax(annualGross - annualPT, 'new')
-    const annualDeductions = annualEmployeePF + annualPT + annualESI + annualTax
+    const annualEmployeeESI = monthlyGross <= 21000 ? annualGross * 0.0075 : 0
+    const annualEmployerESI = monthlyGross <= 21000 ? annualGross * 0.0325 : 0
+
+    // Fix: PT is NOT deductible in new regime — pass gross directly
+    const { totalTax: annualTax } = calculateTax(annualGross, 'new')
+
+    const annualDeductions = annualEmployeePF + annualPT + annualEmployeeESI + annualTax
     const annualInHand = annualGross - annualDeductions
     const monthlyInHand = annualInHand / 12
 
@@ -56,6 +64,8 @@ export function SalaryCalculator() {
       annualPT,
       annualTax,
       annualDeductions,
+      annualEmployeeESI,
+      annualEmployerESI,
     })
   }
 
@@ -98,8 +108,9 @@ export function SalaryCalculator() {
   const chartData = [
     { name: 'In-Hand', value: results.annualInHand },
     { name: 'Tax', value: results.annualTax },
-    { name: 'PF & Other', value: results.annualEmployeePF + results.annualPT },
-    { name: 'Employer Contrib', value: results.annualEmployerPF + results.annualGratuity },
+    // ESI merged into PF & Other so chart adds up correctly
+    { name: 'PF & Other', value: results.annualEmployeePF + results.annualPT + results.annualEmployeeESI },
+    { name: 'Employer Contrib', value: results.annualEmployerPF + results.annualGratuity + results.annualEmployerESI },
   ]
 
   return (
@@ -180,7 +191,12 @@ export function SalaryCalculator() {
           <BreakdownRow label="HRA" value={results.annualHRA} showAnnual={showAnnual} />
           <BreakdownRow label="Special Allowance" value={results.annualSpecial} showAnnual={showAnnual} />
           {variablePay > 0 && (
-            <BreakdownRow label="Variable Pay" value={variablePay} showAnnual={showAnnual} />
+            // Variable pay is an annual lump sum — always show annual, label clarifies in monthly view
+            <BreakdownRow
+              label={showAnnual ? 'Variable Pay' : 'Variable Pay (annual)'}
+              value={variablePay}
+              showAnnual={true}
+            />
           )}
           <div className="h-px bg-border-default" />
           <BreakdownRow label="Gross Salary" value={results.annualGross} showAnnual={showAnnual} bold />
@@ -190,6 +206,9 @@ export function SalaryCalculator() {
         <Card className="space-y-3">
           <BreakdownRow label="Employee PF" value={results.annualEmployeePF} showAnnual={showAnnual} />
           <BreakdownRow label="Professional Tax" value={results.annualPT} showAnnual={showAnnual} />
+          {results.annualEmployeeESI > 0 && (
+            <BreakdownRow label="ESI (0.75%)" value={results.annualEmployeeESI} showAnnual={showAnnual} />
+          )}
           <BreakdownRow label="Income Tax (New Regime)" value={results.annualTax} showAnnual={showAnnual} danger />
           <div className="h-px bg-border-default" />
           <BreakdownRow label="Total Deductions" value={results.annualDeductions} showAnnual={showAnnual} bold />

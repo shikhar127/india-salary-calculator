@@ -7,7 +7,7 @@ export const STATES = [
   { name: 'Telangana', pt: 2400 },
   { name: 'Andhra Pradesh', pt: 2400 },
   { name: 'Gujarat', pt: 2400 },
-  { name: 'Kerala', pt: 2400 },
+  { name: 'Kerala', pt: 1200 },
   { name: 'Delhi', pt: 0 },
   { name: 'Uttar Pradesh', pt: 0 },
   { name: 'Punjab', pt: 0 },
