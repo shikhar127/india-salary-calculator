@@ -12,5 +12,4 @@
 
 - ✅ Sprint 5: Hike & Reverse Tabs — HikeCompare with black projected growth card, ReverseCalculator with binary search + animated result
 
-## In Progress
-- Sprint 6: Polish, Build & APK
+- ✅ Sprint 6: Polish, Build & APK — compileSdk→35, Java 21, `npx cap sync`, Gradle assembleRelease, APK signed → ~/Downloads/india-salary-calculator.apk, pushed to GitHub
