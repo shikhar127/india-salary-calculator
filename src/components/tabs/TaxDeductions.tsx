@@ -84,7 +84,53 @@ export function TaxDeductions() {
       <div className="pt-4">
         <h2 className="text-2xl font-bold mb-4">Regime Comparison</h2>
 
-        {/* Income Details — inputs first */}
+        {/* Recommendation Card — on top */}
+        <div
+          className={`p-6 rounded-2xl mb-4 ${comparison.better === 'new' ? 'bg-black text-white' : 'bg-white border border-border-default'}`}
+        >
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <p className={`text-xs font-semibold uppercase tracking-[0.12em] mb-1 ${comparison.better === 'new' ? 'text-gray-500' : 'text-secondary'}`}>
+                Recommendation
+              </p>
+              <h3 className="text-xl font-bold">
+                Choose {comparison.better === 'new' ? 'New' : 'Old'} Regime
+              </h3>
+            </div>
+            {comparison.better === 'new' && (
+              <CheckCircle2 className="text-accent-green h-6 w-6" />
+            )}
+          </div>
+          <div className="mt-4 flex flex-col items-start gap-1">
+            <div className="flex items-center gap-2">
+              <DisplayAmount
+                amount={comparison.savings}
+                size="lg"
+                color="text-accent-green"
+              />
+              <span className="text-sm font-medium opacity-60">saved</span>
+            </div>
+            <span className={`text-[0.62rem] font-medium tracking-widest uppercase opacity-40 ${comparison.better === 'new' ? '' : 'text-accent-green'}`}>
+              {numberToWords(comparison.savings)}
+            </span>
+          </div>
+        </div>
+
+        {/* Side by Side */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Card className={comparison.better === 'new' ? 'ring-2 ring-accent-green' : ''}>
+            <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">New Regime</p>
+            <DisplayAmount amount={comparison.new.totalTax} size="md" />
+            <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
+          </Card>
+          <Card className={comparison.better === 'old' ? 'ring-2 ring-accent-green' : ''}>
+            <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">Old Regime</p>
+            <DisplayAmount amount={comparison.old.totalTax} size="md" />
+            <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
+          </Card>
+        </div>
+
+        {/* Income Details — inputs below result */}
         <h3 className="text-lg font-bold mb-3">Income Details</h3>
         <Card className="space-y-4 mb-6">
           <div>
@@ -120,7 +166,7 @@ export function TaxDeductions() {
 
         {/* Deductions */}
         <h3 className="text-lg font-bold mb-3">Deductions</h3>
-        <Card className="space-y-4 mb-6">
+        <Card className="space-y-4">
           {/* HRA section */}
           <div className="bg-bg-secondary p-3 rounded-lg">
             <div className="flex justify-between items-center mb-3">
@@ -198,52 +244,6 @@ export function TaxDeductions() {
             <p className="text-xs text-secondary mt-1">New Regime cap: 14% of Basic · Old Regime cap: 10% of Basic</p>
           </div>
         </Card>
-
-        {/* Recommendation Card — below inputs */}
-        <div
-          className={`p-6 rounded-2xl mb-6 ${comparison.better === 'new' ? 'bg-black text-white' : 'bg-white border border-border-default'}`}
-        >
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <p className={`text-xs font-semibold uppercase tracking-[0.12em] mb-1 ${comparison.better === 'new' ? 'text-gray-500' : 'text-secondary'}`}>
-                Recommendation
-              </p>
-              <h3 className="text-xl font-bold">
-                Choose {comparison.better === 'new' ? 'New' : 'Old'} Regime
-              </h3>
-            </div>
-            {comparison.better === 'new' && (
-              <CheckCircle2 className="text-accent-green h-6 w-6" />
-            )}
-          </div>
-          <div className="mt-4 flex flex-col items-start gap-1">
-            <div className="flex items-center gap-2">
-              <DisplayAmount
-                amount={comparison.savings}
-                size="lg"
-                color="text-accent-green"
-              />
-              <span className="text-sm font-medium opacity-60">saved</span>
-            </div>
-            <span className={`text-[0.62rem] font-medium tracking-widest uppercase opacity-40 ${comparison.better === 'new' ? '' : 'text-accent-green'}`}>
-              {numberToWords(comparison.savings)}
-            </span>
-          </div>
-        </div>
-
-        {/* Side by Side */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className={comparison.better === 'new' ? 'ring-2 ring-accent-green' : ''}>
-            <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">New Regime</p>
-            <DisplayAmount amount={comparison.new.totalTax} size="md" />
-            <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
-          </Card>
-          <Card className={comparison.better === 'old' ? 'ring-2 ring-accent-green' : ''}>
-            <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">Old Regime</p>
-            <DisplayAmount amount={comparison.old.totalTax} size="md" />
-            <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
-          </Card>
-        </div>
       </div>
     </div>
   )
