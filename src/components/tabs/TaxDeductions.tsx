@@ -9,6 +9,7 @@ import { numberToWords } from '../../utils/formatting'
 import {
   SENIOR_OLD_REGIME_SLABS,
   VERY_SENIOR_OLD_REGIME_SLABS,
+  STATES,
 } from '../../utils/constants'
 import { CheckCircle2 } from 'lucide-react'
 
@@ -26,6 +27,7 @@ export function TaxDeductions() {
   const [nps, setNps] = useState<number>(50000)
   const [employerNps, setEmployerNps] = useState<number>(0)
   const [ageGroup, setAgeGroup] = useState<AgeGroup>('below60')
+  const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [comparison, setComparison] = useState<any>(null)
 
   const ded80DMax = ageGroup === 'below60' ? 25000 : 50000
@@ -37,17 +39,24 @@ export function TaxDeductions() {
   }, [ageGroup])
 
   useEffect(() => {
-    const dedEmployerNps = Math.min(employerNps, basicSalary * 0.10)
+    // 80CCD(2) limits are regime-specific (FY 2025-26):
+    // New Regime → 14% of Basic, Old Regime → 10% of Basic
+    const dedEmployerNpsNew = Math.min(employerNps, basicSalary * 0.14)
+    const dedEmployerNpsOld = Math.min(employerNps, basicSalary * 0.10)
 
-    // New regime: 80CCD(2) employer NPS is deductible even in new regime
-    const newRegimeIncome = Math.max(0, income - dedEmployerNps)
+    const stateData = STATES.find((s) => s.name === selectedState) || STATES[0]
+    const annualPT = stateData.pt
+
+    // New regime: employer NPS (80CCD(2)) deductible; PT not deductible
+    const newRegimeIncome = Math.max(0, income - dedEmployerNpsNew)
     const newRegimeResult = calculateTax(newRegimeIncome, 'new')
 
     const hraExemption = receivesHRA ? calculateHRAExemption(basicSalary, hraReceived, rentPaid, isMetro) : 0
     const ded80C = Math.min(section80C, 150000)
     const ded80D = Math.min(section80D, ded80DMax)
     const dedNPS = Math.min(nps, 50000)
-    const totalExemptions = hraExemption + ded80C + ded80D + dedNPS + dedEmployerNps
+    // Old regime: PT deductible under Section 16(iii); standard deduction applied inside calculateTax
+    const totalExemptions = hraExemption + annualPT + ded80C + ded80D + dedNPS + dedEmployerNpsOld
     const oldRegimeTaxable = Math.max(0, income - totalExemptions)
 
     // Pick old regime slabs based on age
@@ -66,7 +75,7 @@ export function TaxDeductions() {
       savings: Math.abs(newRegimeResult.totalTax - oldRegimeResult.totalTax),
       better: newRegimeResult.totalTax < oldRegimeResult.totalTax ? 'new' : 'old',
     })
-  }, [income, section80C, section80D, hraReceived, rentPaid, basicSalary, isMetro, nps, employerNps, ageGroup, receivesHRA])
+  }, [income, section80C, section80D, hraReceived, rentPaid, basicSalary, isMetro, nps, employerNps, ageGroup, receivesHRA, selectedState])
 
   if (!comparison) return null
 
@@ -98,6 +107,15 @@ export function TaxDeductions() {
               { label: '80+ (Very Senior)', value: '80plus' },
             ]}
           />
+          <div>
+            <Select
+              label="State"
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+            />
+            <p className="text-xs text-secondary mt-1">Professional Tax is deductible in Old Regime (Section 16(iii))</p>
+          </div>
         </Card>
 
         {/* Deductions */}
@@ -168,14 +186,17 @@ export function TaxDeductions() {
             />
             <p className="text-xs text-secondary mt-1">Your personal top-up contribution to NPS, separate from employer's.</p>
           </div>
-          <Input
-            label="Employer NPS — also deductible in New Regime (80CCD 2)"
-            prefix="₹"
-            type="number"
-            value={employerNps}
-            onChange={(e) => setEmployerNps(Number(e.target.value))}
-            suffix={`/ ${((basicSalary * 0.1) / 1000).toFixed(0)}k`}
-          />
+          <div>
+            <Input
+              label="Employer NPS — also deductible in New Regime (80CCD 2)"
+              prefix="₹"
+              type="number"
+              value={employerNps}
+              onChange={(e) => setEmployerNps(Number(e.target.value))}
+              suffix={`/ ${((basicSalary * 0.14) / 1000).toFixed(0)}k`}
+            />
+            <p className="text-xs text-secondary mt-1">New Regime cap: 14% of Basic · Old Regime cap: 10% of Basic</p>
+          </div>
         </Card>
 
         {/* Recommendation Card — below inputs */}

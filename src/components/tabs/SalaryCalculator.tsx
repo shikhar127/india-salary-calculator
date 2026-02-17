@@ -206,6 +206,11 @@ export function SalaryCalculator() {
             <span>More Options</span>
             <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
           </button>
+          {!showAdvanced && (
+            <p className="text-xs text-secondary -mt-1">
+              {isMetro ? 'Metro' : 'Non-Metro'} · {selectedState} · PF {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
+            </p>
+          )}
           {showAdvanced && (
             <>
               <div className="grid grid-cols-2 gap-4">
@@ -256,9 +261,10 @@ export function SalaryCalculator() {
               />
               {variablePay > 0 && (
                 <BreakdownRow
-                  label={showAnnual ? 'Variable Pay' : 'Variable Pay (annual)'}
+                  label="Variable Pay"
                   value={variablePay}
-                  showAnnual={true}
+                  showAnnual={showAnnual}
+                  note={!showAnnual ? `Annual total: ${formatIndianCurrency(variablePay)} · paid at year-end` : undefined}
                 />
               )}
               <div className="h-px bg-border-default" />
@@ -346,6 +352,7 @@ function BreakdownRow({
   bold = false,
   danger = false,
   info,
+  note,
 }: {
   label: string
   value: number
@@ -353,6 +360,7 @@ function BreakdownRow({
   bold?: boolean
   danger?: boolean
   info?: string
+  note?: string
 }) {
   const [showInfo, setShowInfo] = useState(false)
   const displayVal = showAnnual ? value : value / 12
@@ -374,6 +382,7 @@ function BreakdownRow({
         </div>
         <RowAmount amount={displayVal} bold={bold} danger={danger} />
       </div>
+      {note && <p className="text-xs text-secondary mt-0.5">{note}</p>}
       {info && showInfo && (
         <p className="text-xs text-secondary mt-1.5 leading-relaxed">{info}</p>
       )}
