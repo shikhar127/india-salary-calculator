@@ -9,16 +9,16 @@ interface ToggleProps {
 
 export function Toggle({ value, onChange, leftLabel, rightLabel }: ToggleProps) {
   return (
-    <div className="bg-bg-secondary p-1 rounded-full inline-flex items-center relative">
+    <div className="bg-bg-secondary p-1 rounded-full flex items-center relative w-full">
       <button
         onClick={() => onChange(false)}
-        className={`relative z-10 px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${!value ? 'text-primary' : 'text-secondary'}`}
+        className={`relative z-10 flex-1 py-1.5 text-xs font-semibold rounded-full transition-colors text-center ${!value ? 'text-primary' : 'text-secondary'}`}
       >
         {leftLabel}
       </button>
       <button
         onClick={() => onChange(true)}
-        className={`relative z-10 px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${value ? 'text-primary' : 'text-secondary'}`}
+        className={`relative z-10 flex-1 py-1.5 text-xs font-semibold rounded-full transition-colors text-center ${value ? 'text-primary' : 'text-secondary'}`}
       >
         {rightLabel}
       </button>
