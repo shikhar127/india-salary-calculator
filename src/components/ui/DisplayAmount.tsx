@@ -23,34 +23,31 @@ export function DisplayAmount({ amount, size = 'hero', suffix, showSign = false,
     sm: 'text-[0.9375rem] display-sm',
   }
 
-  const amountSpan = (
-    <span className={`inline-flex items-baseline ${sizeClasses[size]} ${color || 'text-primary'} ${className}`}>
-      {sign && (
+  // Always a span so it doesn't break flex/inline contexts
+  return (
+    <span className={`inline-flex flex-col items-center ${color || 'text-primary'} ${className}`}>
+      <span className={`inline-flex items-baseline ${sizeClasses[size]}`}>
+        {sign && (
+          <span className="text-[0.6em] font-extrabold opacity-85 mr-[0.04em]" style={{ verticalAlign: '0.1em' }}>
+            {sign}
+          </span>
+        )}
         <span className="text-[0.6em] font-extrabold opacity-85 mr-[0.04em]" style={{ verticalAlign: '0.1em' }}>
-          {sign}
+          ₹
         </span>
-      )}
-      <span className="text-[0.6em] font-extrabold opacity-85 mr-[0.04em]" style={{ verticalAlign: '0.1em' }}>
-        ₹
+        <span>{formatted}</span>
+        {suffix && (
+          <span className="text-[0.3em] font-semibold tracking-wide opacity-50 ml-[0.15em]" style={{ verticalAlign: '0.15em' }}>
+            {suffix}
+          </span>
+        )}
       </span>
-      <span>{formatted}</span>
-      {suffix && (
-        <span className="text-[0.3em] font-semibold tracking-wide opacity-50 ml-[0.15em]" style={{ verticalAlign: '0.15em' }}>
-          {suffix}
+      {showWords && (
+        <span className="text-[0.62rem] font-medium tracking-widest opacity-40 mt-0.5 uppercase">
+          {numberToWords(amount)}
         </span>
       )}
     </span>
-  )
-
-  if (!showWords) return amountSpan
-
-  return (
-    <div className="inline-flex flex-col items-center">
-      {amountSpan}
-      <p className="text-[0.65rem] font-medium tracking-wide opacity-40 mt-1 uppercase">
-        {numberToWords(amount)}
-      </p>
-    </div>
   )
 }
 

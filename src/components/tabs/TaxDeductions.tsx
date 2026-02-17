@@ -5,6 +5,7 @@ import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { calculateTax, calculateHRAExemption } from '../../utils/taxLogic'
+import { numberToWords } from '../../utils/formatting'
 import {
   SENIOR_OLD_REGIME_SLABS,
   VERY_SENIOR_OLD_REGIME_SLABS,
@@ -84,14 +85,18 @@ export function TaxDeductions() {
               <CheckCircle2 className="text-accent-green h-6 w-6" />
             )}
           </div>
-          <div className="mt-4">
-            <DisplayAmount
-              amount={comparison.savings}
-              size="lg"
-              color="text-accent-green"
-              showWords
-            />
-            <span className="text-sm font-medium ml-2 opacity-60">saved</span>
+          <div className="mt-4 flex flex-col items-start gap-1">
+            <div className="flex items-center gap-2">
+              <DisplayAmount
+                amount={comparison.savings}
+                size="lg"
+                color="text-accent-green"
+              />
+              <span className="text-sm font-medium opacity-60">saved</span>
+            </div>
+            <span className={`text-[0.62rem] font-medium tracking-widest uppercase opacity-40 ${comparison.better === 'new' ? '' : 'text-accent-green'}`}>
+              {numberToWords(comparison.savings)}
+            </span>
           </div>
         </div>
 

@@ -193,8 +193,8 @@ export function SalaryCalculator() {
                 <Toggle
                   value={pfMode === 'full'}
                   onChange={(v) => setPfMode(v ? 'full' : 'capped')}
-                  leftLabel="Statutory cap (₹1,800/mo)"
-                  rightLabel="12% of full basic"
+                  leftLabel="₹1,800/mo"
+                  rightLabel="12% of basic"
                 />
               </div>
             </>
