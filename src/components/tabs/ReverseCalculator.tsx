@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Card } from '../ui/Card'
-import { Input } from '../ui/Input'
 import { Button } from '../ui/Button'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
@@ -8,9 +7,12 @@ import { formatIndianCurrency } from '../../utils/formatting'
 import { calculateTax, calcPF } from '../../utils/taxLogic'
 
 export function ReverseCalculator() {
-  const [targetInHand, setTargetInHand] = useState<number>(100000)
+  const [targetValue, setTargetValue] = useState<number>(100)
+  const [unit, setUnit] = useState<'thousand' | 'lakh'>('thousand')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [result, setResult] = useState<{ ctc: number; tax: number; pf: number } | null>(null)
+
+  const targetInHand = unit === 'lakh' ? targetValue * 100000 : targetValue * 1000
 
   const calculateRequiredCTC = () => {
     const targetAnnualNet = targetInHand * 12
@@ -21,7 +23,6 @@ export function ReverseCalculator() {
     const getNet = (c: number) => {
       const basic = c * 0.5
       const employerPF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
-      // Gratuity treated as separate — not deducted from gross
       const gross = c - employerPF
       const employeePF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
       const pt = 2500
@@ -59,14 +60,43 @@ export function ReverseCalculator() {
       </p>
 
       <Card>
-        <div className="space-y-6">
-          <Input
-            label="Desired Monthly In-Hand"
-            prefix="₹"
-            type="number"
-            value={targetInHand}
-            onChange={(e) => setTargetInHand(Number(e.target.value))}
-          />
+        <div className="space-y-5">
+          {/* Amount entry */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-3">
+              Desired Monthly In-Hand
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center flex-1 border border-border-default rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-black">
+                <span className="text-secondary font-semibold mr-2">₹</span>
+                <input
+                  type="number"
+                  value={targetValue}
+                  onChange={(e) => setTargetValue(Number(e.target.value))}
+                  className="flex-1 bg-transparent outline-none text-lg font-bold w-full min-w-0"
+                  placeholder="0"
+                />
+                <span className="text-secondary font-semibold ml-2 text-sm whitespace-nowrap">
+                  {unit === 'lakh' ? 'L' : 'K'}
+                </span>
+              </div>
+            </div>
+            {/* Unit toggle */}
+            <div className="mt-3">
+              <Toggle
+                value={unit === 'lakh'}
+                onChange={(v) => setUnit(v ? 'lakh' : 'thousand')}
+                leftLabel="Thousands (₹K)"
+                rightLabel="Lakhs (₹L)"
+              />
+            </div>
+            {/* Preview */}
+            <p className="text-xs text-secondary mt-2 text-center">
+              = {formatIndianCurrency(targetInHand)} per month
+            </p>
+          </div>
+
+          {/* PF mode */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-2">PF Calculation</p>
             <Toggle
@@ -76,6 +106,7 @@ export function ReverseCalculator() {
               rightLabel="12% of full basic"
             />
           </div>
+
           <Button fullWidth onClick={calculateRequiredCTC}>
             Calculate Required CTC
           </Button>
@@ -88,7 +119,7 @@ export function ReverseCalculator() {
             <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em] mb-3">
               You need a CTC of
             </p>
-            <DisplayAmount amount={result.ctc} size="hero" suffix="/yr" />
+            <DisplayAmount amount={result.ctc} size="hero" suffix="/yr" showWords />
           </div>
 
           <Card className="bg-bg-secondary border-transparent">

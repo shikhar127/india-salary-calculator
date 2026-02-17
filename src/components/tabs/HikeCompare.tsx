@@ -46,7 +46,7 @@ export function HikeCompare() {
           <span className="font-bold text-xs uppercase tracking-[0.12em]">Projected Growth</span>
         </div>
         <div className="flex items-baseline">
-          <DisplayAmount amount={result.newInHand} size="lg" suffix="/mo" color="text-white" />
+          <DisplayAmount amount={result.newInHand} size="lg" suffix="/mo" color="text-white" showWords />
         </div>
         <div className="mt-5 pt-4 border-t border-gray-800 flex justify-between items-center">
           <span className="text-sm text-gray-500">Monthly Increase</span>

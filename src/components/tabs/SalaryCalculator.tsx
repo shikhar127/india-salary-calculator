@@ -123,6 +123,7 @@ export function SalaryCalculator() {
             amount={showAnnual ? results.annualInHand : results.monthlyInHand}
             size="hero"
             suffix={showAnnual ? '/yr' : '/mo'}
+            showWords
           />
         </div>
         <div className="flex justify-center pt-3">

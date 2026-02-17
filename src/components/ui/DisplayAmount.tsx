@@ -1,5 +1,5 @@
 import React from 'react'
-import { formatNumber } from '../../utils/formatting'
+import { formatNumber, numberToWords } from '../../utils/formatting'
 
 interface DisplayAmountProps {
   amount: number
@@ -8,9 +8,10 @@ interface DisplayAmountProps {
   showSign?: boolean
   className?: string
   color?: string
+  showWords?: boolean
 }
 
-export function DisplayAmount({ amount, size = 'hero', suffix, showSign = false, className = '', color }: DisplayAmountProps) {
+export function DisplayAmount({ amount, size = 'hero', suffix, showSign = false, className = '', color, showWords = false }: DisplayAmountProps) {
   const formatted = formatNumber(Math.abs(amount))
   const isNegative = amount < 0
   const sign = showSign ? (isNegative ? '−' : '+') : isNegative ? '−' : ''
@@ -22,7 +23,7 @@ export function DisplayAmount({ amount, size = 'hero', suffix, showSign = false,
     sm: 'text-[0.9375rem] display-sm',
   }
 
-  return (
+  const amountSpan = (
     <span className={`inline-flex items-baseline ${sizeClasses[size]} ${color || 'text-primary'} ${className}`}>
       {sign && (
         <span className="text-[0.6em] font-extrabold opacity-85 mr-[0.04em]" style={{ verticalAlign: '0.1em' }}>
@@ -39,6 +40,17 @@ export function DisplayAmount({ amount, size = 'hero', suffix, showSign = false,
         </span>
       )}
     </span>
+  )
+
+  if (!showWords) return amountSpan
+
+  return (
+    <div className="inline-flex flex-col items-center">
+      {amountSpan}
+      <p className="text-[0.65rem] font-medium tracking-wide opacity-40 mt-1 uppercase">
+        {numberToWords(amount)}
+      </p>
+    </div>
   )
 }
 

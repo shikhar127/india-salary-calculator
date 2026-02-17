@@ -89,6 +89,7 @@ export function TaxDeductions() {
               amount={comparison.savings}
               size="lg"
               color="text-accent-green"
+              showWords
             />
             <span className="text-sm font-medium ml-2 opacity-60">saved</span>
           </div>
