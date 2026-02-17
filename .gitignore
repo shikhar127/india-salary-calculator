@@ -3,3 +3,4 @@ android/
 ios/
 .DS_Store
 *.apk
+release.keystore
