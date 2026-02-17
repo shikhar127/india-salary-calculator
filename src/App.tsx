@@ -31,19 +31,6 @@ function App() {
   return (
     <div className="min-h-screen bg-bg-primary text-primary font-sans selection:bg-accent-green selection:text-black">
       <main className="max-w-md mx-auto min-h-screen bg-bg-primary relative shadow-2xl overflow-hidden">
-        {/* Header */}
-        <header className="px-6 py-4 flex justify-between items-center sticky top-0 z-10 border-b border-border-default/50 backdrop-blur-md bg-white/80">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">₹</span>
-            </div>
-            <span className="font-bold text-lg tracking-tight">SalaryFit</span>
-          </div>
-          <div className="text-xs font-medium px-2 py-1 bg-bg-secondary rounded-md text-secondary">
-            FY 2025-26
-          </div>
-        </header>
-
         {/* Scrollable Content */}
         <div className="px-6 py-4 pb-28">
           {renderContent()}
