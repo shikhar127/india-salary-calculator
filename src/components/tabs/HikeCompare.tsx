@@ -86,14 +86,14 @@ export function HikeCompare() {
             value={currentCtc}
             onChange={(e) => setCurrentCtc(Number(e.target.value))}
           />
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Expected Hike %"
-              suffix="%"
-              type="number"
-              value={hikePercent}
-              onChange={(e) => setHikePercent(Number(e.target.value))}
-            />
+          <Input
+            label="Expected Hike %"
+            suffix="%"
+            type="number"
+            value={hikePercent}
+            onChange={(e) => setHikePercent(Number(e.target.value))}
+          />
+          {pfMode === 'full' && (
             <Input
               label="Basic Salary %"
               suffix="%"
@@ -102,7 +102,7 @@ export function HikeCompare() {
               onChange={(e) => setBasicPercent(Number(e.target.value))}
               placeholder="40–60%"
             />
-          </div>
+          )}
           <Select
             label="State"
             value={selectedState}
