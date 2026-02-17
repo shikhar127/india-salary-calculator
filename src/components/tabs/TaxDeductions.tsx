@@ -18,8 +18,9 @@ export function TaxDeductions() {
   const [income, setIncome] = useState<number>(1500000)
   const [section80C, setSection80C] = useState<number>(150000)
   const [section80D, setSection80D] = useState<number>(25000)
+  const [receivesHRA, setReceivesHRA] = useState<boolean>(false)
   const [hraReceived, setHraReceived] = useState<number>(200000)
-  const [rentPaid, setRentPaid] = useState<number>(180000)
+  const [rentPaid, setRentPaid] = useState<number>(0)
   const [basicSalary, setBasicSalary] = useState<number>(750000)
   const [isMetro, setIsMetro] = useState<boolean>(true)
   const [nps, setNps] = useState<number>(50000)
@@ -29,6 +30,12 @@ export function TaxDeductions() {
 
   const ded80DMax = ageGroup === 'below60' ? 25000 : 50000
 
+  // Sync 80D cap when age group changes
+  useEffect(() => {
+    const max = ageGroup === 'below60' ? 25000 : 50000
+    if (section80D > max) setSection80D(max)
+  }, [ageGroup])
+
   useEffect(() => {
     const dedEmployerNps = Math.min(employerNps, basicSalary * 0.10)
 
@@ -36,7 +43,7 @@ export function TaxDeductions() {
     const newRegimeIncome = Math.max(0, income - dedEmployerNps)
     const newRegimeResult = calculateTax(newRegimeIncome, 'new')
 
-    const hraExemption = calculateHRAExemption(basicSalary, hraReceived, rentPaid, isMetro)
+    const hraExemption = receivesHRA ? calculateHRAExemption(basicSalary, hraReceived, rentPaid, isMetro) : 0
     const ded80C = Math.min(section80C, 150000)
     const ded80D = Math.min(section80D, ded80DMax)
     const dedNPS = Math.min(nps, 50000)
@@ -59,7 +66,7 @@ export function TaxDeductions() {
       savings: Math.abs(newRegimeResult.totalTax - oldRegimeResult.totalTax),
       better: newRegimeResult.totalTax < oldRegimeResult.totalTax ? 'new' : 'old',
     })
-  }, [income, section80C, section80D, hraReceived, rentPaid, basicSalary, isMetro, nps, employerNps, ageGroup])
+  }, [income, section80C, section80D, hraReceived, rentPaid, basicSalary, isMetro, nps, employerNps, ageGroup, receivesHRA])
 
   if (!comparison) return null
 
@@ -68,7 +75,110 @@ export function TaxDeductions() {
       <div className="pt-4">
         <h2 className="text-2xl font-bold mb-4">Regime Comparison</h2>
 
-        {/* Recommendation Card */}
+        {/* Income Details — inputs first */}
+        <h3 className="text-lg font-bold mb-3">Income Details</h3>
+        <Card className="space-y-4 mb-6">
+          <div>
+            <Input
+              label="Gross Annual Income"
+              prefix="₹"
+              type="number"
+              value={income}
+              onChange={(e) => setIncome(Number(e.target.value))}
+            />
+            <p className="text-xs text-secondary mt-1">≈ CTC minus Employer PF contribution</p>
+          </div>
+          <Select
+            label="Age Group"
+            value={ageGroup}
+            onChange={(e) => setAgeGroup(e.target.value as AgeGroup)}
+            options={[
+              { label: 'Below 60', value: 'below60' },
+              { label: '60–79 (Senior Citizen)', value: '60to79' },
+              { label: '80+ (Very Senior)', value: '80plus' },
+            ]}
+          />
+        </Card>
+
+        {/* Deductions */}
+        <h3 className="text-lg font-bold mb-3">Deductions</h3>
+        <Card className="space-y-4 mb-6">
+          {/* HRA section */}
+          <div className="bg-bg-secondary p-3 rounded-lg">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs font-semibold text-secondary">HRA Exemption (Old Regime)</p>
+              <Toggle
+                value={receivesHRA}
+                onChange={setReceivesHRA}
+                leftLabel="Own home"
+                rightLabel="Renting"
+              />
+            </div>
+            {receivesHRA && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Basic Salary"
+                    prefix="₹"
+                    type="number"
+                    value={basicSalary}
+                    onChange={(e) => setBasicSalary(Number(e.target.value))}
+                  />
+                  <Input
+                    label="Rent Paid"
+                    prefix="₹"
+                    type="number"
+                    value={rentPaid}
+                    onChange={(e) => setRentPaid(Number(e.target.value))}
+                  />
+                </div>
+                <Toggle
+                  value={isMetro}
+                  onChange={setIsMetro}
+                  leftLabel="Non-Metro"
+                  rightLabel="Metro"
+                />
+              </div>
+            )}
+          </div>
+
+          <Input
+            label="Section 80C (EPF, LIC, ELSS)"
+            prefix="₹"
+            type="number"
+            value={section80C}
+            onChange={(e) => setSection80C(Number(e.target.value))}
+            suffix="/ 1.5L"
+          />
+          <Input
+            label={`Section 80D (Health Ins) — max ₹${(ded80DMax / 1000).toFixed(0)}k`}
+            prefix="₹"
+            type="number"
+            value={section80D}
+            onChange={(e) => setSection80D(Number(e.target.value))}
+          />
+          <div>
+            <Input
+              label="NPS — Voluntary Contribution (80CCD 1B)"
+              prefix="₹"
+              type="number"
+              value={nps}
+              onChange={(e) => setNps(Number(e.target.value))}
+              suffix="/ 50k"
+            />
+            <p className="text-xs text-secondary mt-1">Your personal top-up contribution to NPS, separate from employer's.</p>
+          </div>
+          <Input
+            label="Employer NPS — also deductible in New Regime (80CCD 2)"
+            prefix="₹"
+            type="number"
+            value={employerNps}
+            onChange={(e) => setEmployerNps(Number(e.target.value))}
+            suffix={`/ ${((basicSalary * 0.1) / 1000).toFixed(0)}k`}
+          />
+        </Card>
+
+        {/* Recommendation Card — below inputs */}
         <div
           className={`p-6 rounded-2xl mb-6 ${comparison.better === 'new' ? 'bg-black text-white' : 'bg-white border border-border-default'}`}
         >
@@ -101,7 +211,7 @@ export function TaxDeductions() {
         </div>
 
         {/* Side by Side */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3">
           <Card className={comparison.better === 'new' ? 'ring-2 ring-accent-green' : ''}>
             <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">New Regime</p>
             <DisplayAmount amount={comparison.new.totalTax} size="md" />
@@ -113,92 +223,6 @@ export function TaxDeductions() {
             <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
           </Card>
         </div>
-
-        {/* Income & Profile */}
-        <h3 className="text-lg font-bold mb-3">Income Details</h3>
-        <Card className="space-y-4 mb-6">
-          <Input
-            label="Gross Annual Income"
-            prefix="₹"
-            type="number"
-            value={income}
-            onChange={(e) => setIncome(Number(e.target.value))}
-          />
-          <Select
-            label="Age Group"
-            value={ageGroup}
-            onChange={(e) => setAgeGroup(e.target.value as AgeGroup)}
-            options={[
-              { label: 'Below 60', value: 'below60' },
-              { label: '60–79 (Senior Citizen)', value: '60to79' },
-              { label: '80+ (Very Senior)', value: '80plus' },
-            ]}
-          />
-        </Card>
-
-        {/* Deductions */}
-        <h3 className="text-lg font-bold mb-3">Deductions</h3>
-        <Card className="space-y-4">
-          <div className="bg-bg-secondary p-3 rounded-lg">
-            <p className="text-xs text-secondary mb-2">HRA Exemption (Old Regime)</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Basic Salary"
-                prefix="₹"
-                type="number"
-                value={basicSalary}
-                onChange={(e) => setBasicSalary(Number(e.target.value))}
-              />
-              <Input
-                label="Rent Paid"
-                prefix="₹"
-                type="number"
-                value={rentPaid}
-                onChange={(e) => setRentPaid(Number(e.target.value))}
-              />
-            </div>
-            <div className="mt-3">
-              <Toggle
-                value={isMetro}
-                onChange={setIsMetro}
-                leftLabel="Non-Metro"
-                rightLabel="Metro"
-              />
-            </div>
-          </div>
-
-          <Input
-            label="Section 80C (EPF, LIC, ELSS)"
-            prefix="₹"
-            type="number"
-            value={section80C}
-            onChange={(e) => setSection80C(Number(e.target.value))}
-            suffix="/ 1.5L"
-          />
-          <Input
-            label={`Section 80D (Health Ins) — max ₹${(ded80DMax / 1000).toFixed(0)}k`}
-            prefix="₹"
-            type="number"
-            value={section80D}
-            onChange={(e) => setSection80D(Number(e.target.value))}
-          />
-          <Input
-            label="NPS Employee (80CCD 1B)"
-            prefix="₹"
-            type="number"
-            value={nps}
-            onChange={(e) => setNps(Number(e.target.value))}
-            suffix="/ 50k"
-          />
-          <Input
-            label="Employer NPS (80CCD 2) — both regimes"
-            prefix="₹"
-            type="number"
-            value={employerNps}
-            onChange={(e) => setEmployerNps(Number(e.target.value))}
-            suffix={`/ ${((basicSalary * 0.1) / 1000).toFixed(0)}k`}
-          />
-        </Card>
       </div>
     </div>
   )

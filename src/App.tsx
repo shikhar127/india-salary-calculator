@@ -56,7 +56,7 @@ function App() {
             <NavButton active={activeTab === 'salary'} onClick={() => setActiveTab('salary')} icon={<Calculator className="w-6 h-6" />} label="Salary" />
             <NavButton active={activeTab === 'tax'} onClick={() => setActiveTab('tax')} icon={<FileText className="w-6 h-6" />} label="Tax" />
             <NavButton active={activeTab === 'hike'} onClick={() => setActiveTab('hike')} icon={<TrendingUp className="w-6 h-6" />} label="Hike" />
-            <NavButton active={activeTab === 'reverse'} onClick={() => setActiveTab('reverse')} icon={<RotateCcw className="w-6 h-6" />} label="Reverse" />
+            <NavButton active={activeTab === 'reverse'} onClick={() => setActiveTab('reverse')} icon={<RotateCcw className="w-6 h-6" />} label="CTC Needed" />
           </div>
         </nav>
       </main>
