@@ -1,4 +1,4 @@
-import React, { useState, Component } from 'react'
+import React, { useEffect, useRef, useState, Component } from 'react'
 
 class ErrorBoundary extends Component<{children: React.ReactNode}, {error: string | null}> {
   constructor(props: any) { super(props); this.state = { error: null } }
@@ -18,6 +18,29 @@ type Tab = 'salary' | 'tax' | 'hike' | 'reverse'
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('salary')
+  const [navVisible, setNavVisible] = useState(true)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      if (currentScrollY > lastScrollY.current + 10) {
+        setNavVisible(false)
+      } else if (currentScrollY < lastScrollY.current - 5) {
+        setNavVisible(true)
+      }
+      lastScrollY.current = currentScrollY
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab)
+    setNavVisible(true)
+    lastScrollY.current = 0
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -30,20 +53,22 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-primary font-sans selection:bg-accent-green selection:text-black">
-      <main className="max-w-md mx-auto min-h-screen bg-bg-primary relative shadow-2xl overflow-hidden">
+      <main className="max-w-md mx-auto min-h-screen bg-bg-primary relative shadow-2xl overflow-x-hidden">
         {/* Scrollable Content */}
         <div className="px-6 py-4 pb-28">
           {renderContent()}
         </div>
 
-        {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-black text-white pt-2 px-6 max-w-md mx-auto rounded-t-3xl shadow-nav"
-          style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+        {/* Bottom Navigation — hides on scroll down, shows on scroll up */}
+        <nav
+          className={`fixed bottom-0 left-0 right-0 bg-black text-white pt-2 px-6 max-w-md mx-auto rounded-t-3xl transition-transform duration-300 ease-in-out ${navVisible ? 'translate-y-0' : 'translate-y-full'}`}
+          style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
+        >
           <div className="flex justify-between items-center h-16">
-            <NavButton active={activeTab === 'salary'} onClick={() => setActiveTab('salary')} icon={<Calculator className="w-6 h-6" />} label="Salary" />
-            <NavButton active={activeTab === 'tax'} onClick={() => setActiveTab('tax')} icon={<FileText className="w-6 h-6" />} label="Tax" />
-            <NavButton active={activeTab === 'hike'} onClick={() => setActiveTab('hike')} icon={<TrendingUp className="w-6 h-6" />} label="Hike" />
-            <NavButton active={activeTab === 'reverse'} onClick={() => setActiveTab('reverse')} icon={<RotateCcw className="w-6 h-6" />} label="CTC Needed" />
+            <NavButton active={activeTab === 'salary'} onClick={() => handleTabChange('salary')} icon={<Calculator className="w-6 h-6" />} label="Salary" />
+            <NavButton active={activeTab === 'tax'} onClick={() => handleTabChange('tax')} icon={<FileText className="w-6 h-6" />} label="Tax" />
+            <NavButton active={activeTab === 'hike'} onClick={() => handleTabChange('hike')} icon={<TrendingUp className="w-6 h-6" />} label="Hike" />
+            <NavButton active={activeTab === 'reverse'} onClick={() => handleTabChange('reverse')} icon={<RotateCcw className="w-6 h-6" />} label="CTC Needed" />
           </div>
         </nav>
       </main>
