@@ -1,7 +1,7 @@
 {
   "appId": "com.shikhar.salarycalculator",
   "appName": "India Salary Calculator",
-  "webDir": "www",
+  "webDir": "dist",
   "server": {
     "androidScheme": "https"
   }
