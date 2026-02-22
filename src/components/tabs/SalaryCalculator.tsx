@@ -13,6 +13,7 @@ import { calculateSalaryBreakdown, SalaryBreakdown, TaxRegime } from '../../util
 import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../../utils/ctcInput'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
+type OldRegimeAgeGroup = 'below60' | '60plus'
 
 export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number | null; onCtcChange?: (ctc: number) => void }) {
   const initialCtc = savedCtc && savedCtc > 0 ? savedCtc : 0
@@ -25,8 +26,36 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
   const [showAnnual, setShowAnnual] = useState<boolean>(false)
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [taxRegime, setTaxRegime] = useState<TaxRegime>('new')
+  const [oldRegimeAgeGroup, setOldRegimeAgeGroup] = useState<OldRegimeAgeGroup>('below60')
+  const [old80C, setOld80C] = useState<number>(0)
+  const [old80D, setOld80D] = useState<number>(0)
+  const [oldNps, setOldNps] = useState<number>(0)
+  const [oldHomeLoanInterest, setOldHomeLoanInterest] = useState<number>(0)
+  const [oldEducationLoanInterest, setOldEducationLoanInterest] = useState<number>(0)
+  const [oldSavingsInterest, setOldSavingsInterest] = useState<number>(0)
+  const [oldHraExemption, setOldHraExemption] = useState<number>(0)
   const [results, setResults] = useState<SalaryBreakdown | null>(null)
   const [copied, setCopied] = useState<boolean>(false)
+  const old80DMax = oldRegimeAgeGroup === 'below60' ? 25000 : 50000
+  const oldSavingsMax = oldRegimeAgeGroup === 'below60' ? 10000 : 50000
+
+  const additionalOldRegimeDeductions =
+    Math.min(Math.max(old80C, 0), 150000) +
+    Math.min(Math.max(old80D, 0), old80DMax) +
+    Math.min(Math.max(oldNps, 0), 50000) +
+    Math.min(Math.max(oldHomeLoanInterest, 0), 200000) +
+    Math.max(oldEducationLoanInterest, 0) +
+    Math.min(Math.max(oldSavingsInterest, 0), oldSavingsMax) +
+    Math.max(oldHraExemption, 0)
+
+  useEffect(() => {
+    if (old80D > old80DMax) {
+      setOld80D(old80DMax)
+    }
+    if (oldSavingsInterest > oldSavingsMax) {
+      setOldSavingsInterest(oldSavingsMax)
+    }
+  }, [old80D, old80DMax, oldSavingsInterest, oldSavingsMax])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,6 +93,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
       taxRegime,
       professionalTaxMode: 'state',
       manualProfessionalTaxAnnual: 0,
+      additionalOldRegimeDeductions: taxRegime === 'old' ? additionalOldRegimeDeductions : 0,
     })
 
     setResults(breakdown)
@@ -75,6 +105,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     selectedState,
     pfMode,
     taxRegime,
+    additionalOldRegimeDeductions,
   ])
 
   const handleShare = async () => {
@@ -247,6 +278,92 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
           <p className="text-xs text-secondary -mt-1">
             Professional tax is auto-estimated from selected state.
           </p>
+
+          {taxRegime === 'old' && (
+            <Card className="bg-bg-secondary border-border-default space-y-3">
+              <h4 className="text-sm font-bold">Old Regime Deductions (Optional)</h4>
+              <p className="text-xs text-secondary -mt-1">Add annual deductions you are eligible for (80C etc.).</p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="Age Group"
+                  value={oldRegimeAgeGroup}
+                  onChange={(e) => setOldRegimeAgeGroup(e.target.value as OldRegimeAgeGroup)}
+                  options={[
+                    { label: 'Below 60', value: 'below60' },
+                    { label: '60+', value: '60plus' },
+                  ]}
+                />
+                <Input
+                  label="80C"
+                  prefix="₹"
+                  type="number"
+                  value={old80C || ''}
+                  onChange={(e) => setOld80C(Number(e.target.value || 0))}
+                  placeholder="Max 1,50,000"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label={`80D (max ₹${old80DMax.toLocaleString('en-IN')})`}
+                  prefix="₹"
+                  type="number"
+                  value={old80D || ''}
+                  onChange={(e) => setOld80D(Number(e.target.value || 0))}
+                />
+                <Input
+                  label="NPS (80CCD 1B)"
+                  prefix="₹"
+                  type="number"
+                  value={oldNps || ''}
+                  onChange={(e) => setOldNps(Number(e.target.value || 0))}
+                  placeholder="Max 50,000"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Home Loan Interest (24b)"
+                  prefix="₹"
+                  type="number"
+                  value={oldHomeLoanInterest || ''}
+                  onChange={(e) => setOldHomeLoanInterest(Number(e.target.value || 0))}
+                  placeholder="Max 2,00,000"
+                />
+                <Input
+                  label="Education Loan Interest (80E)"
+                  prefix="₹"
+                  type="number"
+                  value={oldEducationLoanInterest || ''}
+                  onChange={(e) => setOldEducationLoanInterest(Number(e.target.value || 0))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label={`Savings Interest (${oldRegimeAgeGroup === 'below60' ? '80TTA' : '80TTB'})`}
+                  prefix="₹"
+                  type="number"
+                  value={oldSavingsInterest || ''}
+                  onChange={(e) => setOldSavingsInterest(Number(e.target.value || 0))}
+                  placeholder={`Max ${oldSavingsMax.toLocaleString('en-IN')}`}
+                />
+                <Input
+                  label="HRA Exemption"
+                  prefix="₹"
+                  type="number"
+                  value={oldHraExemption || ''}
+                  onChange={(e) => setOldHraExemption(Number(e.target.value || 0))}
+                  placeholder="If applicable"
+                />
+              </div>
+
+              <p className="text-xs text-secondary">
+                Total extra old-regime deductions considered: {formatIndianCurrency(additionalOldRegimeDeductions)}
+              </p>
+            </Card>
+          )}
         </div>
       </Card>
 
