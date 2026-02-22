@@ -7,6 +7,7 @@ import { Select } from '../ui/Select'
 import { Button } from '../ui/Button'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount, RowAmount } from '../ui/DisplayAmount'
+import { SuggestionChips } from '../ui/SuggestionChips'
 import { STATES } from '../../utils/constants'
 import { formatIndianCurrency, formatShorthand, formatNumber } from '../../utils/formatting'
 import { calculateSalaryBreakdown, SalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
@@ -32,6 +33,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
   const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
   const [results, setResults] = useState<SalaryBreakdown | null>(null)
   const [copied, setCopied] = useState<boolean>(false)
+  const ctcSuggestions = ['6', '10', '15', '25']
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -136,6 +138,10 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     : []
 
   const basicWarning = basicPercent > 0 && (basicPercent < 30 || basicPercent > 70)
+  const applyCtcSuggestion = (lakhValue: string) => {
+    setCtcLakhInput(lakhValue)
+    setCtc(lakhInputToRupees(lakhValue))
+  }
 
   return (
     <div className="space-y-6 pb-24">
@@ -157,6 +163,12 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
           <p className="text-xs text-secondary -mt-2">
             Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
           </p>
+          <SuggestionChips
+            label="Suggested salaries"
+            options={ctcSuggestions.map((value) => ({ label: `${value} LAKH`, value }))}
+            activeValue={ctcLakhInput}
+            onPick={applyCtcSuggestion}
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div>

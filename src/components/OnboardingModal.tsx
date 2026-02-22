@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Input } from './ui/Input'
+import { SuggestionChips } from './ui/SuggestionChips'
 import { formatIndianCurrency } from '../utils/formatting'
 import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../utils/ctcInput'
 
@@ -10,6 +11,7 @@ interface OnboardingModalProps {
 export function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const [ctcLakhInput, setCtcLakhInput] = useState<string>('')
   const [ctc, setCtc] = useState<number>(0)
+  const ctcSuggestions = ['8', '12', '20', '30']
 
   const handleContinue = () => {
     if (ctc > 0) {
@@ -21,6 +23,11 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
 
   const handleSkip = () => {
     onComplete(null)
+  }
+
+  const applyCtcSuggestion = (lakhValue: string) => {
+    setCtcLakhInput(lakhValue)
+    setCtc(lakhInputToRupees(lakhValue))
   }
 
   return (
@@ -50,6 +57,12 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
           <p className="text-xs text-secondary mt-1">
             Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
           </p>
+          <SuggestionChips
+            label="Suggested salaries"
+            options={ctcSuggestions.map((value) => ({ label: `${value} LAKH`, value }))}
+            activeValue={ctcLakhInput}
+            onPick={applyCtcSuggestion}
+          />
         </div>
 
         <div className="flex gap-3">

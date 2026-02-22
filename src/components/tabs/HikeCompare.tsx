@@ -4,6 +4,7 @@ import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
+import { SuggestionChips } from '../ui/SuggestionChips'
 import { formatIndianCurrency, formatNumber } from '../../utils/formatting'
 import { STATES } from '../../utils/constants'
 import { TrendingUp, ArrowRight } from 'lucide-react'
@@ -24,6 +25,7 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
   const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+  const ctcSuggestions = ['6', '10', '15', '25']
 
   useEffect(() => {
     if (sharedCtc && sharedCtc > 0) {
@@ -51,6 +53,10 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   const currentInHand = calcInHand(currentCtc)
   const newInHand = calcInHand(newCtc)
   const diff = newInHand - currentInHand
+  const applyCtcSuggestion = (lakhValue: string) => {
+    setCurrentCtcLakhInput(lakhValue)
+    setCurrentCtc(lakhInputToRupees(lakhValue))
+  }
 
   return (
     <div className="space-y-6 pb-24 pt-4">
@@ -72,6 +78,12 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
             suffix="LAKH"
             suffixClassName="text-primary font-extrabold tracking-wide text-base"
             placeholder="e.g. 18"
+          />
+          <SuggestionChips
+            label="Suggested salaries"
+            options={ctcSuggestions.map((value) => ({ label: `${value} LAKH`, value }))}
+            activeValue={currentCtcLakhInput}
+            onPick={applyCtcSuggestion}
           />
           <Input
             label="Expected Hike %"

@@ -4,6 +4,7 @@ import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
+import { SuggestionChips } from '../ui/SuggestionChips'
 import { calculateTax, calculateHRAExemption, TaxResult } from '../../utils/taxLogic'
 import { numberToWords, formatNumber, formatIndianCurrency } from '../../utils/formatting'
 import {
@@ -52,6 +53,7 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const [rentPaidInput, setRentPaidInput] = useState<string>('')
   const [npsInput, setNpsInput] = useState<string>('')
   const [employerNpsInput, setEmployerNpsInput] = useState<string>('')
+  const ctcSuggestions = ['6', '10', '15', '25']
 
   const basicSalary = ctc * 0.5
   const employerPF = pfMode === 'capped'
@@ -138,6 +140,11 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
 
   if (!comparison) return null
 
+  const applyCtcSuggestion = (lakhValue: string) => {
+    setCtcLakhInput(lakhValue)
+    setCtc(lakhInputToRupees(lakhValue))
+  }
+
   return (
     <div className="space-y-6 pb-24">
       <div className="pt-4">
@@ -163,6 +170,12 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
             <p className="text-xs text-secondary mt-1">
               Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
             </p>
+            <SuggestionChips
+              label="Suggested salaries"
+              options={ctcSuggestions.map((value) => ({ label: `${value} LAKH`, value }))}
+              activeValue={ctcLakhInput}
+              onPick={applyCtcSuggestion}
+            />
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
