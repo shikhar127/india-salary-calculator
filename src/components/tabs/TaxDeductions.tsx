@@ -53,7 +53,12 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const [rentPaidInput, setRentPaidInput] = useState<string>('')
   const [npsInput, setNpsInput] = useState<string>('')
   const [employerNpsInput, setEmployerNpsInput] = useState<string>('')
-  const ctcSuggestions = ['6', '10', '15', '25']
+  const ctcIncrementOptions = [
+    { label: '+25K', value: '25000' },
+    { label: '+1L', value: '100000' },
+    { label: '+5L', value: '500000' },
+    { label: '+20L', value: '2000000' },
+  ]
 
   const basicSalary = ctc * 0.5
   const employerPF = pfMode === 'capped'
@@ -140,9 +145,12 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
 
   if (!comparison) return null
 
-  const applyCtcSuggestion = (lakhValue: string) => {
-    setCtcLakhInput(lakhValue)
-    setCtc(lakhInputToRupees(lakhValue))
+  const applyCtcIncrement = (incrementValue: string) => {
+    const incrementRupees = Number(incrementValue)
+    const baseRupees = lakhInputToRupees(ctcLakhInput)
+    const nextRupees = Math.max(0, baseRupees + incrementRupees)
+    setCtcLakhInput(formatLakhValue(nextRupees))
+    setCtc(nextRupees)
   }
 
   return (
@@ -171,10 +179,9 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
               Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
             </p>
             <SuggestionChips
-              label="Suggested salaries"
-              options={ctcSuggestions.map((value) => ({ label: `${value} LAKH`, value }))}
-              activeValue={ctcLakhInput}
-              onPick={applyCtcSuggestion}
+              label="Quick add"
+              options={ctcIncrementOptions}
+              onPick={applyCtcIncrement}
             />
           </div>
           <div>

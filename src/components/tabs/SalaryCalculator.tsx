@@ -33,7 +33,12 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
   const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
   const [results, setResults] = useState<SalaryBreakdown | null>(null)
   const [copied, setCopied] = useState<boolean>(false)
-  const ctcSuggestions = ['6', '10', '15', '25']
+  const ctcIncrementOptions = [
+    { label: '+25K', value: '25000' },
+    { label: '+1L', value: '100000' },
+    { label: '+5L', value: '500000' },
+    { label: '+20L', value: '2000000' },
+  ]
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -138,9 +143,12 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     : []
 
   const basicWarning = basicPercent > 0 && (basicPercent < 30 || basicPercent > 70)
-  const applyCtcSuggestion = (lakhValue: string) => {
-    setCtcLakhInput(lakhValue)
-    setCtc(lakhInputToRupees(lakhValue))
+  const applyCtcIncrement = (incrementValue: string) => {
+    const incrementRupees = Number(incrementValue)
+    const baseRupees = lakhInputToRupees(ctcLakhInput)
+    const nextRupees = Math.max(0, baseRupees + incrementRupees)
+    setCtcLakhInput(formatLakhValue(nextRupees))
+    setCtc(nextRupees)
   }
 
   return (
@@ -164,10 +172,9 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
             Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
           </p>
           <SuggestionChips
-            label="Suggested salaries"
-            options={ctcSuggestions.map((value) => ({ label: `${value} LAKH`, value }))}
-            activeValue={ctcLakhInput}
-            onPick={applyCtcSuggestion}
+            label="Quick add"
+            options={ctcIncrementOptions}
+            onPick={applyCtcIncrement}
           />
 
           <div className="grid grid-cols-2 gap-4">

@@ -25,7 +25,12 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
   const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
-  const ctcSuggestions = ['6', '10', '15', '25']
+  const ctcIncrementOptions = [
+    { label: '+25K', value: '25000' },
+    { label: '+1L', value: '100000' },
+    { label: '+5L', value: '500000' },
+    { label: '+20L', value: '2000000' },
+  ]
 
   useEffect(() => {
     if (sharedCtc && sharedCtc > 0) {
@@ -53,9 +58,12 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   const currentInHand = calcInHand(currentCtc)
   const newInHand = calcInHand(newCtc)
   const diff = newInHand - currentInHand
-  const applyCtcSuggestion = (lakhValue: string) => {
-    setCurrentCtcLakhInput(lakhValue)
-    setCurrentCtc(lakhInputToRupees(lakhValue))
+  const applyCtcIncrement = (incrementValue: string) => {
+    const incrementRupees = Number(incrementValue)
+    const baseRupees = lakhInputToRupees(currentCtcLakhInput)
+    const nextRupees = Math.max(0, baseRupees + incrementRupees)
+    setCurrentCtcLakhInput(formatLakhValue(nextRupees))
+    setCurrentCtc(nextRupees)
   }
 
   return (
@@ -80,10 +88,9 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
             placeholder="e.g. 18"
           />
           <SuggestionChips
-            label="Suggested salaries"
-            options={ctcSuggestions.map((value) => ({ label: `${value} LAKH`, value }))}
-            activeValue={currentCtcLakhInput}
-            onPick={applyCtcSuggestion}
+            label="Quick add"
+            options={ctcIncrementOptions}
+            onPick={applyCtcIncrement}
           />
           <Input
             label="Expected Hike %"
