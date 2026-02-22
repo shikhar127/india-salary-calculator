@@ -12,7 +12,7 @@ import {
   STATES,
 } from '../../utils/constants'
 import { CheckCircle2 } from 'lucide-react'
-import { calculateProfessionalTaxAnnual, ProfessionalTaxMode } from '../../utils/professionalTax'
+import { calculateProfessionalTaxAnnual } from '../../utils/professionalTax'
 import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../../utils/ctcInput'
 
 type AgeGroup = 'below60' | '60to79' | '80plus'
@@ -41,9 +41,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const [employerNps, setEmployerNps] = useState<number>(0)
   const [ageGroup, setAgeGroup] = useState<AgeGroup>('below60')
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
-  const [professionalTaxMode, setProfessionalTaxMode] = useState<ProfessionalTaxMode>('state')
-  const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
-  const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
   const [comparison, setComparison] = useState<ComparisonResult | null>(null)
 
   const [section80CInput, setSection80CInput] = useState<string>('')
@@ -89,8 +86,8 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
     const annualPT = calculateProfessionalTaxAnnual({
       stateName: selectedState,
       annualGross: income,
-      mode: professionalTaxMode,
-      manualAnnualTax: manualProfessionalTaxAnnual,
+      mode: 'state',
+      manualAnnualTax: 0,
     })
 
     const newRegimeIncome = Math.max(0, income - dedEmployerNpsNew)
@@ -131,8 +128,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
     ageGroup,
     receivesHRA,
     selectedState,
-    professionalTaxMode,
-    manualProfessionalTaxAnnual,
     ded80DMax,
   ])
 
@@ -233,35 +228,7 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
             onChange={(e) => setSelectedState(e.target.value)}
             options={STATES.map((s) => ({ label: s.name, value: s.name }))}
           />
-          <Select
-            label="Professional Tax"
-            value={professionalTaxMode}
-            onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
-            options={[
-              { label: 'State estimate', value: 'state' },
-              { label: 'Manual annual', value: 'manual' },
-            ]}
-          />
-          {professionalTaxMode === 'manual' && (
-            <Input
-              label="Professional Tax (Annual)"
-              prefix="₹"
-              type="text"
-              inputMode="numeric"
-              value={manualProfessionalTaxAnnualInput}
-              onChange={(e) => {
-                const cleaned = e.target.value.replace(/[^0-9]/g, '')
-                setManualProfessionalTaxAnnualInput(cleaned)
-                setManualProfessionalTaxAnnual(Number(cleaned))
-              }}
-              onFocus={(e) => setManualProfessionalTaxAnnualInput(e.target.value.replace(/,/g, ''))}
-              onBlur={(e) => {
-                const n = Number(e.target.value.replace(/,/g, ''))
-                setManualProfessionalTaxAnnualInput(n > 0 ? formatNumber(n) : '')
-              }}
-            />
-          )}
-          <p className="text-xs text-secondary mt-1">Professional Tax is deductible in Old Regime (Section 16(iii))</p>
+          <p className="text-xs text-secondary mt-1">Professional Tax is auto-estimated from selected state and deductible in Old Regime (Section 16(iii)).</p>
         </Card>
 
         {ctc === 0 ? (
