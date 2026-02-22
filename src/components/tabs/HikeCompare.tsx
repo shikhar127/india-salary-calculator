@@ -44,6 +44,19 @@ export function HikeCompare() {
           <span className="font-bold text-xs uppercase tracking-[0.12em]">Projected Growth</span>
         </div>
 
+        {/* Hike Amount & Percentage */}
+        <div className="mb-5 pb-5 border-b border-gray-800">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-2">Annual Hike</p>
+          <div className="flex items-baseline gap-3">
+            <p className="text-2xl font-bold text-accent-green">
+              +{formatIndianCurrency(newCtc - currentCtc)}
+            </p>
+            <p className="text-lg font-semibold text-gray-400">
+              ({hikePercent}%)
+            </p>
+          </div>
+        </div>
+
         {/* Current → After Hike */}
         <div className="flex items-center gap-3 mb-5">
           <div className="flex-1">

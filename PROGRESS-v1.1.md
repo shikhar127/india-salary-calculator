@@ -5,7 +5,7 @@
 - [x] Sprint 1: Tab Renaming & Opacity Fixes
 - [x] Sprint 2: Currency Formatting in Tax Tab
 - [x] Sprint 3: Currency Formatting in Hike & Reverse Tabs
-- [ ] Sprint 4: Hike Calculator Enhancement
+- [x] Sprint 4: Hike Calculator Enhancement
 - [ ] Sprint 5: Onboarding CTC Capture
 - [ ] Sprint 6: Testing, Build & Deploy
 
@@ -33,3 +33,10 @@
 - Updated label to "Desired Monthly In-Hand" with direct ₹ entry
 - Both tabs now have consistent comma formatting behavior
 - Mobile-optimized with inputMode="numeric"
+
+### ✅ Sprint 4: Hike Calculator Enhancement
+- Added prominent "Annual Hike" section at top of result card
+- Displays absolute hike amount in accent-green: +₹X,XX,XXX
+- Shows hike percentage alongside: (XX%)
+- Positioned above Current → After Hike section with border separator
+- Improved visual hierarchy for key metrics
