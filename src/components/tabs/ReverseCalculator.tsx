@@ -76,8 +76,9 @@ export function ReverseCalculator() {
             value={targetInput}
             onChange={(e) => {
               const stripped = e.target.value.replace(/[^0-9]/g, '')
-              setTargetInput(stripped)
-              setTargetValue(Number(stripped))
+              const noLeadingZeros = stripped.replace(/^0+/, '') || (stripped.length > 0 ? '0' : '')
+              setTargetInput(noLeadingZeros)
+              setTargetValue(Number(noLeadingZeros))
             }}
             onFocus={(e) => setTargetInput(e.target.value.replace(/,/g, ''))}
             onBlur={(e) => {

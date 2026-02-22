@@ -15,10 +15,10 @@ import { CheckCircle2 } from 'lucide-react'
 
 type AgeGroup = 'below60' | '60to79' | '80plus'
 
-export function TaxDeductions() {
+export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
   // CTC and PF mode states
-  const [ctc, setCtc] = useState<number>(0)
-  const [ctcInput, setCtcInput] = useState<string>('0')
+  const [ctc, setCtc] = useState<number>(sharedCtc || 0)
+  const [ctcInput, setCtcInput] = useState<string>(sharedCtc ? formatNumber(sharedCtc) : '')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [showDeductions, setShowDeductions] = useState<boolean>(false)
 
@@ -51,6 +51,14 @@ export function TaxDeductions() {
   const income = ctc - employerPF
 
   const ded80DMax = ageGroup === 'below60' ? 25000 : 50000
+
+  // Sync with shared CTC from Salary tab
+  useEffect(() => {
+    if (sharedCtc && sharedCtc > 0) {
+      setCtc(sharedCtc)
+      setCtcInput(formatNumber(sharedCtc))
+    }
+  }, [sharedCtc])
 
   // Sync 80D cap when age group changes
   useEffect(() => {
@@ -115,8 +123,9 @@ export function TaxDeductions() {
               value={ctcInput}
               onChange={(e) => {
                 const stripped = e.target.value.replace(/[^0-9]/g, '')
-                setCtcInput(stripped)
-                setCtc(Number(stripped))
+                const noLeadingZeros = stripped.replace(/^0+/, '') || (stripped.length > 0 ? '0' : '')
+                setCtcInput(noLeadingZeros)
+                setCtc(Number(noLeadingZeros))
               }}
               onFocus={(e) => setCtcInput(e.target.value.replace(/,/g, ''))}
               onBlur={(e) => {

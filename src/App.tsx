@@ -23,6 +23,7 @@ function App() {
   const lastScrollY = useRef(0)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [savedCtc, setSavedCtc] = useState<number | null>(null)
+  const [sharedCtc, setSharedCtc] = useState<number>(0)
 
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding')
@@ -67,9 +68,9 @@ function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'salary': return <SalaryCalculator savedCtc={savedCtc} />
-      case 'tax': return <TaxDeductions />
-      case 'hike': return <HikeCompare savedCtc={savedCtc} />
+      case 'salary': return <SalaryCalculator savedCtc={savedCtc} onCtcChange={setSharedCtc} />
+      case 'tax': return <TaxDeductions sharedCtc={sharedCtc} />
+      case 'hike': return <HikeCompare savedCtc={savedCtc} sharedCtc={sharedCtc} />
       case 'reverse': return <ReverseCalculator />
     }
   }
@@ -116,7 +117,6 @@ function NavButton({ active, onClick, icon, label }: {
     >
       <div className={`mb-1 ${active ? 'text-accent-green' : ''}`}>{icon}</div>
       <span className="text-[10px] font-medium tracking-wide">{label}</span>
-      {active && <div className="w-1 h-1 bg-accent-green rounded-full mt-1" />}
     </button>
   )
 }

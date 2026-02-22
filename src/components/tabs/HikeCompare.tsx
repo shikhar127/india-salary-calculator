@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
@@ -9,14 +9,23 @@ import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { STATES } from '../../utils/constants'
 import { TrendingUp, ArrowRight } from 'lucide-react'
 
-export function HikeCompare({ savedCtc }: { savedCtc?: number | null }) {
-  const [currentCtc, setCurrentCtc] = useState<number>(savedCtc || 1200000)
-  const [currentCtcInput, setCurrentCtcInput] = useState<string>(formatNumber(savedCtc || 1200000))
+export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null; sharedCtc?: number }) {
+  const initialCtc = sharedCtc || savedCtc || 0
+  const [currentCtc, setCurrentCtc] = useState<number>(initialCtc)
+  const [currentCtcInput, setCurrentCtcInput] = useState<string>(initialCtc > 0 ? formatNumber(initialCtc) : '')
   const [hikePercent, setHikePercent] = useState<number>(30)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+
+  // Sync with shared CTC from Salary tab
+  useEffect(() => {
+    if (sharedCtc && sharedCtc > 0) {
+      setCurrentCtc(sharedCtc)
+      setCurrentCtcInput(formatNumber(sharedCtc))
+    }
+  }, [sharedCtc])
 
   const calcInHand = (ctc: number): number => {
     const basic = ctc * (basicPercent / 100)
@@ -49,8 +58,9 @@ export function HikeCompare({ savedCtc }: { savedCtc?: number | null }) {
             value={currentCtcInput}
             onChange={(e) => {
               const stripped = e.target.value.replace(/[^0-9]/g, '')
-              setCurrentCtcInput(stripped)
-              setCurrentCtc(Number(stripped))
+              const noLeadingZeros = stripped.replace(/^0+/, '') || (stripped.length > 0 ? '0' : '')
+              setCurrentCtcInput(noLeadingZeros)
+              setCurrentCtc(Number(noLeadingZeros))
             }}
             onFocus={(e) => setCurrentCtcInput(e.target.value.replace(/,/g, ''))}
             onBlur={(e) => {

@@ -13,9 +13,9 @@ import { calculateTax, calcPF } from '../../utils/taxLogic'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
 
-export function SalaryCalculator({ savedCtc }: { savedCtc?: number | null }) {
-  const [ctcInput, setCtcInput] = useState<string>(formatNumber(savedCtc || 1200000))
-  const [ctc, setCtc] = useState<number>(savedCtc || 1200000)
+export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number | null; onCtcChange?: (ctc: number) => void }) {
+  const [ctcInput, setCtcInput] = useState<string>(formatNumber(savedCtc || 0))
+  const [ctc, setCtc] = useState<number>(savedCtc || 0)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [variablePay, setVariablePay] = useState<number>(0)
   const [isMetro, setIsMetro] = useState<boolean>(true)
@@ -35,6 +35,13 @@ export function SalaryCalculator({ savedCtc }: { savedCtc?: number | null }) {
     }, 300)
     return () => clearTimeout(timer)
   }, [ctcInput])
+
+  // Notify parent when CTC changes
+  useEffect(() => {
+    if (onCtcChange) {
+      onCtcChange(ctc)
+    }
+  }, [ctc, onCtcChange])
 
   useEffect(() => {
     if (ctc <= 0) {
@@ -141,7 +148,11 @@ export function SalaryCalculator({ savedCtc }: { savedCtc?: number | null }) {
             type="text"
             inputMode="numeric"
             value={ctcInput}
-            onChange={(e) => setCtcInput(e.target.value.replace(/[^0-9]/g, ''))}
+            onChange={(e) => {
+              const cleaned = e.target.value.replace(/[^0-9]/g, '')
+              const noLeadingZeros = cleaned.replace(/^0+/, '') || (cleaned.length > 0 ? '0' : '')
+              setCtcInput(noLeadingZeros)
+            }}
             onFocus={(e) => setCtcInput(e.target.value.replace(/,/g, ''))}
             onBlur={(e) => {
               const n = Number(e.target.value.replace(/,/g, ''))
