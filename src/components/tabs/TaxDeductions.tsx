@@ -4,7 +4,6 @@ import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
-import { SuggestionChips } from '../ui/SuggestionChips'
 import { calculateTax, calculateHRAExemption, TaxResult } from '../../utils/taxLogic'
 import { numberToWords, formatNumber, formatIndianCurrency } from '../../utils/formatting'
 import {
@@ -53,12 +52,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const [rentPaidInput, setRentPaidInput] = useState<string>('')
   const [npsInput, setNpsInput] = useState<string>('')
   const [employerNpsInput, setEmployerNpsInput] = useState<string>('')
-  const ctcIncrementOptions = [
-    { label: '+25K', value: '25000' },
-    { label: '+1L', value: '100000' },
-    { label: '+5L', value: '500000' },
-    { label: '+20L', value: '2000000' },
-  ]
 
   const basicSalary = ctc * 0.5
   const employerPF = pfMode === 'capped'
@@ -145,14 +138,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
 
   if (!comparison) return null
 
-  const applyCtcIncrement = (incrementValue: string) => {
-    const incrementRupees = Number(incrementValue)
-    const baseRupees = lakhInputToRupees(ctcLakhInput)
-    const nextRupees = Math.max(0, baseRupees + incrementRupees)
-    setCtcLakhInput(formatLakhValue(nextRupees))
-    setCtc(nextRupees)
-  }
-
   return (
     <div className="space-y-6 pb-24">
       <div className="pt-4">
@@ -174,14 +159,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
               suffix="LAKH"
               suffixClassName="text-primary font-extrabold tracking-wide text-base"
               placeholder="e.g. 12.5"
-            />
-            <p className="text-xs text-secondary mt-1">
-              Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
-            </p>
-            <SuggestionChips
-              label="Quick add"
-              options={ctcIncrementOptions}
-              onPick={applyCtcIncrement}
             />
           </div>
           <div>

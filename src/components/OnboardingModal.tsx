@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Input } from './ui/Input'
 import { SuggestionChips } from './ui/SuggestionChips'
-import { formatIndianCurrency } from '../utils/formatting'
 import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../utils/ctcInput'
 
 interface OnboardingModalProps {
@@ -62,9 +61,6 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
             suffix="LAKH"
             suffixClassName="text-primary font-extrabold tracking-wide text-base"
           />
-          <p className="text-xs text-secondary mt-1">
-            Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
-          </p>
           <SuggestionChips
             label="Quick add"
             options={ctcIncrementOptions}
