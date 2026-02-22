@@ -6,6 +6,13 @@
 @tailwind utilities;
 
 @layer base {
+  html,
+  body,
+  #root {
+    overscroll-behavior-y: none;
+    overflow-x: hidden;
+  }
+
   body {
     @apply font-sans bg-bg-primary text-primary antialiased;
   }

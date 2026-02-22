@@ -105,7 +105,7 @@ function App() {
 
         {/* Bottom Navigation — hides on scroll down, shows on scroll up */}
         <nav
-          className={`fixed bottom-0 left-0 right-0 bg-black text-white pt-2 px-6 max-w-md mx-auto rounded-t-3xl transition-transform duration-300 ease-in-out ${navVisible ? 'translate-y-0' : 'translate-y-full'}`}
+          className={`fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 bg-black text-white pt-2 px-6 rounded-t-3xl transition-transform duration-300 ease-in-out will-change-transform [backface-visibility:hidden] ${navVisible ? 'translate-y-0' : 'translate-y-full'}`}
           style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
         >
           <div className="flex justify-between items-center h-16">
