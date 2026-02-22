@@ -4,13 +4,14 @@ import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
-import { formatIndianCurrency } from '../../utils/formatting'
+import { formatIndianCurrency, formatNumber } from '../../utils/formatting'
 import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { STATES } from '../../utils/constants'
 import { TrendingUp, ArrowRight } from 'lucide-react'
 
 export function HikeCompare() {
   const [currentCtc, setCurrentCtc] = useState<number>(1200000)
+  const [currentCtcInput, setCurrentCtcInput] = useState<string>(formatNumber(1200000))
   const [hikePercent, setHikePercent] = useState<number>(30)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
@@ -82,9 +83,19 @@ export function HikeCompare() {
           <Input
             label="Current Annual CTC"
             prefix="₹"
-            type="number"
-            value={currentCtc}
-            onChange={(e) => setCurrentCtc(Number(e.target.value))}
+            type="text"
+            inputMode="numeric"
+            value={currentCtcInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setCurrentCtcInput(stripped)
+              setCurrentCtc(Number(stripped))
+            }}
+            onFocus={(e) => setCurrentCtcInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setCurrentCtcInput(n > 0 ? formatNumber(n) : '')
+            }}
           />
           <Input
             label="Expected Hike %"

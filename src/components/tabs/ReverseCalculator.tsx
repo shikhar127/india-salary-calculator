@@ -1,29 +1,20 @@
 import React, { useMemo, useState } from 'react'
 import { Card } from '../ui/Card'
+import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
-import { formatIndianCurrency } from '../../utils/formatting'
+import { formatIndianCurrency, formatNumber } from '../../utils/formatting'
 import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { STATES } from '../../utils/constants'
 
 export function ReverseCalculator() {
-  const [targetValue, setTargetValue] = useState<number>(100)
-  const [unit, setUnit] = useState<'thousand' | 'lakh'>('thousand')
+  const [targetValue, setTargetValue] = useState<number>(100000)
+  const [targetInput, setTargetInput] = useState<string>(formatNumber(100000))
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
 
-  const targetInHand = unit === 'lakh' ? targetValue * 100000 : targetValue * 1000
-
-  const handleUnitToggle = (toLakh: boolean) => {
-    const newUnit = toLakh ? 'lakh' : 'thousand'
-    if (toLakh && unit === 'thousand') {
-      setTargetValue(Math.round(targetValue / 100))
-    } else if (!toLakh && unit === 'lakh') {
-      setTargetValue(targetValue * 100)
-    }
-    setUnit(newUnit)
-  }
+  const targetInHand = targetValue
 
   const result = useMemo(() => {
     if (targetValue <= 0) return null
@@ -64,7 +55,7 @@ export function ReverseCalculator() {
       pf: pfMode === 'capped' ? calcPF(basic) : basic * 0.12,
       pt: annualPT,
     }
-  }, [targetValue, unit, pfMode, selectedState, targetInHand])
+  }, [targetValue, pfMode, selectedState, targetInHand])
 
   return (
     <div className="space-y-6 pb-24 pt-4">
@@ -114,41 +105,24 @@ export function ReverseCalculator() {
       {/* Inputs below */}
       <Card>
         <div className="space-y-5">
-          {/* Amount entry */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-3">
-              Desired Monthly In-Hand
-            </p>
-            <div className="flex items-center flex-1 border border-border-default rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-black">
-              <span className="text-secondary font-semibold mr-2">₹</span>
-              <input
-                type="number"
-                value={targetValue}
-                onChange={(e) => setTargetValue(Number(e.target.value))}
-                className="flex-1 bg-transparent outline-none text-lg font-bold w-full min-w-0"
-                placeholder="0"
-                min={0}
-              />
-              <span className="text-secondary font-semibold ml-2 text-sm whitespace-nowrap">
-                {unit === 'lakh' ? 'L' : 'K'}
-              </span>
-            </div>
-            {/* Unit toggle */}
-            <div className="mt-3">
-              <Toggle
-                value={unit === 'lakh'}
-                onChange={handleUnitToggle}
-                leftLabel="Thousands (₹K)"
-                rightLabel="Lakhs (₹L)"
-              />
-            </div>
-            {/* Preview */}
-            {targetValue > 0 && (
-              <p className="text-xs text-secondary mt-2 text-center">
-                = {formatIndianCurrency(targetInHand)} per month
-              </p>
-            )}
-          </div>
+          <Input
+            label="Desired Monthly In-Hand"
+            prefix="₹"
+            type="text"
+            inputMode="numeric"
+            value={targetInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setTargetInput(stripped)
+              setTargetValue(Number(stripped))
+            }}
+            onFocus={(e) => setTargetInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setTargetInput(n > 0 ? formatNumber(n) : '')
+            }}
+            placeholder="e.g. 1,00,000"
+          />
 
           {/* State */}
           <Select
