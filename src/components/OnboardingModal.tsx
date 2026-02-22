@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { formatNumber } from '../utils/formatting'
+import { Input } from './ui/Input'
+import { formatIndianCurrency } from '../utils/formatting'
+import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../utils/ctcInput'
 
 interface OnboardingModalProps {
   onComplete: (ctc: number | null) => void
 }
 
 export function OnboardingModal({ onComplete }: OnboardingModalProps) {
-  const [ctcInput, setCtcInput] = useState<string>('')
+  const [ctcLakhInput, setCtcLakhInput] = useState<string>('')
   const [ctc, setCtc] = useState<number>(0)
 
   const handleContinue = () => {
@@ -30,31 +32,24 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
         </p>
 
         <div className="mb-6">
-          <label className="block text-xs font-medium text-secondary mb-1.5 uppercase tracking-wide">
-            Annual CTC
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-secondary text-sm">₹</span>
-            </div>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={ctcInput}
-              onChange={(e) => {
-                const stripped = e.target.value.replace(/[^0-9]/g, '')
-                setCtcInput(stripped)
-                setCtc(Number(stripped))
-              }}
-              onFocus={(e) => setCtcInput(e.target.value.replace(/,/g, ''))}
-              onBlur={(e) => {
-                const n = Number(e.target.value.replace(/,/g, ''))
-                setCtcInput(n > 0 ? formatNumber(n) : '')
-              }}
-              placeholder="e.g. 12,00,000"
-              className="block w-full rounded-xl border-transparent bg-bg-secondary text-primary font-medium shadow-sm focus:border-primary focus:ring-1 focus:ring-primary pl-7 pr-4 py-3 text-sm outline-none"
-            />
-          </div>
+          <Input
+            label="Annual CTC"
+            type="text"
+            inputMode="decimal"
+            value={ctcLakhInput}
+            onChange={(e) => {
+              const sanitized = sanitizeLakhInput(e.target.value)
+              setCtcLakhInput(sanitized)
+              setCtc(lakhInputToRupees(sanitized))
+            }}
+            onBlur={(e) => setCtcLakhInput(formatLakhValue(lakhInputToRupees(e.target.value)))}
+            placeholder="e.g. 12.5"
+            suffix="LAKH"
+            suffixClassName="text-primary font-extrabold tracking-wide text-base"
+          />
+          <p className="text-xs text-secondary mt-1">
+            Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
+          </p>
         </div>
 
         <div className="flex gap-3">

@@ -11,24 +11,9 @@ import { STATES } from '../../utils/constants'
 import { formatIndianCurrency, formatShorthand, formatNumber } from '../../utils/formatting'
 import { calculateSalaryBreakdown, SalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
 import { ProfessionalTaxMode } from '../../utils/professionalTax'
+import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../../utils/ctcInput'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
-
-const formatLakhValue = (ctc: number): string => {
-  if (!ctc || ctc <= 0) return ''
-  const inLakhs = ctc / 100000
-  return inLakhs % 1 === 0 ? String(inLakhs) : inLakhs.toFixed(2).replace(/\.?0+$/, '')
-}
-
-const sanitizeLakhInput = (raw: string): string => {
-  const cleaned = raw.replace(/[^0-9.]/g, '')
-  const parts = cleaned.split('.')
-  const merged = parts.length > 1 ? `${parts[0]}.${parts.slice(1).join('')}` : parts[0]
-  const limited = merged.replace(/^(\d*\.?\d{0,2}).*$/, '$1')
-  if (limited === '') return ''
-  if (limited.startsWith('0.') || limited === '0') return limited
-  return limited.replace(/^0+/, '') || ''
-}
 
 export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number | null; onCtcChange?: (ctc: number) => void }) {
   const initialCtc = savedCtc && savedCtc > 0 ? savedCtc : 0
@@ -50,9 +35,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const valInLakhs = Number(ctcLakhInput)
-      if (valInLakhs > 0) setCtc(Math.round(valInLakhs * 100000))
-      else setCtc(0)
+      setCtc(lakhInputToRupees(ctcLakhInput))
     }, 300)
     return () => clearTimeout(timer)
   }, [ctcLakhInput])
@@ -165,8 +148,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
             value={ctcLakhInput}
             onChange={(e) => setCtcLakhInput(sanitizeLakhInput(e.target.value))}
             onBlur={(e) => {
-              const n = Number(e.target.value)
-              setCtcLakhInput(n > 0 ? formatLakhValue(Math.round(n * 100000)) : '')
+              setCtcLakhInput(formatLakhValue(lakhInputToRupees(e.target.value)))
             }}
             placeholder="e.g. 12.5"
             suffix="LAKH"

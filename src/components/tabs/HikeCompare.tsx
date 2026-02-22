@@ -9,11 +9,12 @@ import { STATES } from '../../utils/constants'
 import { TrendingUp, ArrowRight } from 'lucide-react'
 import { calculateSalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
 import { ProfessionalTaxMode } from '../../utils/professionalTax'
+import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../../utils/ctcInput'
 
 export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null; sharedCtc?: number }) {
   const initialCtc = sharedCtc || savedCtc || 0
   const [currentCtc, setCurrentCtc] = useState<number>(initialCtc)
-  const [currentCtcInput, setCurrentCtcInput] = useState<string>(initialCtc > 0 ? formatNumber(initialCtc) : '')
+  const [currentCtcLakhInput, setCurrentCtcLakhInput] = useState<string>(initialCtc > 0 ? formatLakhValue(initialCtc) : '')
   const [hikePercent, setHikePercent] = useState<number>(30)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
@@ -27,7 +28,7 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   useEffect(() => {
     if (sharedCtc && sharedCtc > 0) {
       setCurrentCtc(sharedCtc)
-      setCurrentCtcInput(formatNumber(sharedCtc))
+      setCurrentCtcLakhInput(formatLakhValue(sharedCtc))
     }
   }, [sharedCtc])
 
@@ -59,21 +60,18 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
         <div className="space-y-4">
           <Input
             label="Current Annual CTC"
-            prefix="₹"
             type="text"
-            inputMode="numeric"
-            value={currentCtcInput}
+            inputMode="decimal"
+            value={currentCtcLakhInput}
             onChange={(e) => {
-              const stripped = e.target.value.replace(/[^0-9]/g, '')
-              const noLeadingZeros = stripped.replace(/^0+/, '') || (stripped.length > 0 ? '0' : '')
-              setCurrentCtcInput(noLeadingZeros)
-              setCurrentCtc(Number(noLeadingZeros))
+              const sanitized = sanitizeLakhInput(e.target.value)
+              setCurrentCtcLakhInput(sanitized)
+              setCurrentCtc(lakhInputToRupees(sanitized))
             }}
-            onFocus={(e) => setCurrentCtcInput(e.target.value.replace(/,/g, ''))}
-            onBlur={(e) => {
-              const n = Number(e.target.value.replace(/,/g, ''))
-              setCurrentCtcInput(n > 0 ? formatNumber(n) : '')
-            }}
+            onBlur={(e) => setCurrentCtcLakhInput(formatLakhValue(lakhInputToRupees(e.target.value)))}
+            suffix="LAKH"
+            suffixClassName="text-primary font-extrabold tracking-wide text-base"
+            placeholder="e.g. 18"
           />
           <Input
             label="Expected Hike %"

@@ -133,15 +133,18 @@ export function ReverseCalculator() {
           {showAdvanced && (
             <>
               <div className="grid grid-cols-2 gap-4">
-                <Select
-                  label="Tax Regime"
-                  value={taxRegime}
-                  onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
-                  options={[
-                    { label: 'New Regime', value: 'new' },
-                    { label: 'Old Regime', value: 'old' },
-                  ]}
-                />
+                <div>
+                  <Select
+                    label="Tax Regime"
+                    value={taxRegime}
+                    onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
+                    options={[
+                      { label: 'New Regime', value: 'new' },
+                      { label: 'Old Regime', value: 'old' },
+                    ]}
+                  />
+                  <p className="text-[11px] text-secondary mt-1">Default: New Regime (recommended for most users)</p>
+                </div>
                 <Select
                   label="State"
                   value={selectedState}

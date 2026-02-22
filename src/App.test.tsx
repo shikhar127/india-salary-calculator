@@ -46,11 +46,11 @@ describe('App cross-tab CTC sync', () => {
 
     const taxInput = screen.getByLabelText(/Annual CTC/i) as HTMLInputElement
     await waitFor(() => {
-      expect(taxInput.value.replace(/,/g, '')).toBe('1200000')
+      expect(taxInput.value).toBe('12')
     })
 
     act(() => {
-      fireEvent.change(taxInput, { target: { value: '1800000' } })
+      fireEvent.change(taxInput, { target: { value: '18' } })
     })
 
     act(() => {

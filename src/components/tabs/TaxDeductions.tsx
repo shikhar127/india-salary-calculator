@@ -13,6 +13,7 @@ import {
 } from '../../utils/constants'
 import { CheckCircle2 } from 'lucide-react'
 import { calculateProfessionalTaxAnnual, ProfessionalTaxMode } from '../../utils/professionalTax'
+import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../../utils/ctcInput'
 
 type AgeGroup = 'below60' | '60to79' | '80plus'
 
@@ -26,7 +27,7 @@ interface ComparisonResult {
 export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; onCtcChange?: (ctc: number) => void }) {
   const initialCtc = sharedCtc && sharedCtc > 0 ? sharedCtc : 0
   const [ctc, setCtc] = useState<number>(initialCtc)
-  const [ctcInput, setCtcInput] = useState<string>(initialCtc > 0 ? formatNumber(initialCtc) : '')
+  const [ctcLakhInput, setCtcLakhInput] = useState<string>(initialCtc > 0 ? formatLakhValue(initialCtc) : '')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [showDeductions, setShowDeductions] = useState<boolean>(false)
 
@@ -63,7 +64,7 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   useEffect(() => {
     if (sharedCtc && sharedCtc > 0) {
       setCtc(sharedCtc)
-      setCtcInput(formatNumber(sharedCtc))
+      setCtcLakhInput(formatLakhValue(sharedCtc))
     }
   }, [sharedCtc])
 
@@ -146,23 +147,22 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
           <div>
             <Input
               label="Annual CTC"
-              prefix="₹"
               type="text"
-              inputMode="numeric"
-              value={ctcInput}
+              inputMode="decimal"
+              value={ctcLakhInput}
               onChange={(e) => {
-                const stripped = e.target.value.replace(/[^0-9]/g, '')
-                const noLeadingZeros = stripped.replace(/^0+/, '') || (stripped.length > 0 ? '0' : '')
-                setCtcInput(noLeadingZeros)
-                setCtc(Number(noLeadingZeros))
+                const sanitized = sanitizeLakhInput(e.target.value)
+                setCtcLakhInput(sanitized)
+                setCtc(lakhInputToRupees(sanitized))
               }}
-              onFocus={(e) => setCtcInput(e.target.value.replace(/,/g, ''))}
-              onBlur={(e) => {
-                const n = Number(e.target.value.replace(/,/g, ''))
-                setCtcInput(n > 0 ? formatNumber(n) : '')
-              }}
+              onBlur={(e) => setCtcLakhInput(formatLakhValue(lakhInputToRupees(e.target.value)))}
+              suffix="LAKH"
+              suffixClassName="text-primary font-extrabold tracking-wide text-base"
+              placeholder="e.g. 12.5"
             />
-            <p className="text-xs text-secondary mt-1">Your total Cost to Company</p>
+            <p className="text-xs text-secondary mt-1">
+              Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
+            </p>
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -230,7 +230,7 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
         {ctc === 0 ? (
           <div className="text-center py-16 px-6">
             <h3 className="text-2xl font-bold mb-3">Compare Tax Regimes</h3>
-            <p className="text-secondary text-sm mb-8 max-w-sm mx-auto">Enter your Annual CTC to see which tax regime saves you more</p>
+            <p className="text-secondary text-sm mb-8 max-w-sm mx-auto">Enter your Annual CTC in lakhs to see which tax regime saves you more</p>
           </div>
         ) : (
           <>
