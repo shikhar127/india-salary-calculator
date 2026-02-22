@@ -27,26 +27,33 @@ import { OnboardingModal } from './components/OnboardingModal'
 
 type Tab = 'salary' | 'tax' | 'hike' | 'reverse'
 
+const getStoredCtc = (): number | null => {
+  try {
+    const stored = localStorage.getItem('savedCtc')
+    if (!stored) return null
+    const parsed = Number(stored)
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+const getHasSeenOnboarding = (): boolean => {
+  try {
+    return localStorage.getItem('hasSeenOnboarding') === 'true'
+  } catch {
+    return false
+  }
+}
+
 function App() {
+  const initialSavedCtc = getStoredCtc()
   const [activeTab, setActiveTab] = useState<Tab>('salary')
   const [navVisible, setNavVisible] = useState(true)
   const lastScrollY = useRef(0)
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  const [savedCtc, setSavedCtc] = useState<number | null>(null)
-  const [sharedCtc, setSharedCtc] = useState<number>(0)
-
-  useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding')
-    const storedCtc = localStorage.getItem('savedCtc')
-
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true)
-    } else if (storedCtc) {
-      const parsed = Number(storedCtc)
-      setSavedCtc(parsed)
-      setSharedCtc(parsed)
-    }
-  }, [])
+  const [showOnboarding, setShowOnboarding] = useState(!getHasSeenOnboarding())
+  const [savedCtc, setSavedCtc] = useState<number | null>(initialSavedCtc)
+  const [sharedCtc, setSharedCtc] = useState<number>(initialSavedCtc ?? 0)
 
   useEffect(() => {
     const handleScroll = () => {
