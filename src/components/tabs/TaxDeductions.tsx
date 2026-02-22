@@ -5,7 +5,7 @@ import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { calculateTax, calculateHRAExemption } from '../../utils/taxLogic'
-import { numberToWords } from '../../utils/formatting'
+import { numberToWords, formatNumber } from '../../utils/formatting'
 import {
   SENIOR_OLD_REGIME_SLABS,
   VERY_SENIOR_OLD_REGIME_SLABS,
@@ -16,6 +16,7 @@ import { CheckCircle2 } from 'lucide-react'
 type AgeGroup = 'below60' | '60to79' | '80plus'
 
 export function TaxDeductions() {
+  // Numeric states for calculations
   const [income, setIncome] = useState<number>(1500000)
   const [section80C, setSection80C] = useState<number>(150000)
   const [section80D, setSection80D] = useState<number>(25000)
@@ -29,6 +30,16 @@ export function TaxDeductions() {
   const [ageGroup, setAgeGroup] = useState<AgeGroup>('below60')
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [comparison, setComparison] = useState<any>(null)
+
+  // String states for formatted display
+  const [incomeInput, setIncomeInput] = useState<string>(formatNumber(1500000))
+  const [section80CInput, setSection80CInput] = useState<string>(formatNumber(150000))
+  const [section80DInput, setSection80DInput] = useState<string>(formatNumber(25000))
+  const [hraReceivedInput, setHraReceivedInput] = useState<string>(formatNumber(200000))
+  const [rentPaidInput, setRentPaidInput] = useState<string>(formatNumber(0))
+  const [basicSalaryInput, setBasicSalaryInput] = useState<string>(formatNumber(750000))
+  const [npsInput, setNpsInput] = useState<string>(formatNumber(50000))
+  const [employerNpsInput, setEmployerNpsInput] = useState<string>(formatNumber(0))
 
   const ded80DMax = ageGroup === 'below60' ? 25000 : 50000
 
@@ -137,9 +148,19 @@ export function TaxDeductions() {
             <Input
               label="Gross Annual Income"
               prefix="₹"
-              type="number"
-              value={income}
-              onChange={(e) => setIncome(Number(e.target.value))}
+              type="text"
+              inputMode="numeric"
+              value={incomeInput}
+              onChange={(e) => {
+                const stripped = e.target.value.replace(/[^0-9]/g, '')
+                setIncomeInput(stripped)
+                setIncome(Number(stripped))
+              }}
+              onFocus={(e) => setIncomeInput(e.target.value.replace(/,/g, ''))}
+              onBlur={(e) => {
+                const n = Number(e.target.value.replace(/,/g, ''))
+                setIncomeInput(n > 0 ? formatNumber(n) : '0')
+              }}
             />
             <p className="text-xs text-secondary mt-1">≈ CTC minus Employer PF contribution</p>
           </div>
@@ -184,16 +205,36 @@ export function TaxDeductions() {
                   <Input
                     label="Basic Salary"
                     prefix="₹"
-                    type="number"
-                    value={basicSalary}
-                    onChange={(e) => setBasicSalary(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={basicSalaryInput}
+                    onChange={(e) => {
+                      const stripped = e.target.value.replace(/[^0-9]/g, '')
+                      setBasicSalaryInput(stripped)
+                      setBasicSalary(Number(stripped))
+                    }}
+                    onFocus={(e) => setBasicSalaryInput(e.target.value.replace(/,/g, ''))}
+                    onBlur={(e) => {
+                      const n = Number(e.target.value.replace(/,/g, ''))
+                      setBasicSalaryInput(n > 0 ? formatNumber(n) : '0')
+                    }}
                   />
                   <Input
                     label="Rent Paid"
                     prefix="₹"
-                    type="number"
-                    value={rentPaid}
-                    onChange={(e) => setRentPaid(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={rentPaidInput}
+                    onChange={(e) => {
+                      const stripped = e.target.value.replace(/[^0-9]/g, '')
+                      setRentPaidInput(stripped)
+                      setRentPaid(Number(stripped))
+                    }}
+                    onFocus={(e) => setRentPaidInput(e.target.value.replace(/,/g, ''))}
+                    onBlur={(e) => {
+                      const n = Number(e.target.value.replace(/,/g, ''))
+                      setRentPaidInput(n > 0 ? formatNumber(n) : '0')
+                    }}
                   />
                 </div>
                 <Toggle
@@ -209,25 +250,55 @@ export function TaxDeductions() {
           <Input
             label="Section 80C (EPF, LIC, ELSS)"
             prefix="₹"
-            type="number"
-            value={section80C}
-            onChange={(e) => setSection80C(Number(e.target.value))}
+            type="text"
+            inputMode="numeric"
+            value={section80CInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setSection80CInput(stripped)
+              setSection80C(Number(stripped))
+            }}
+            onFocus={(e) => setSection80CInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setSection80CInput(n > 0 ? formatNumber(n) : '0')
+            }}
             suffix="/ 1.5L"
           />
           <Input
             label={`Section 80D (Health Ins) — max ₹${(ded80DMax / 1000).toFixed(0)}k`}
             prefix="₹"
-            type="number"
-            value={section80D}
-            onChange={(e) => setSection80D(Number(e.target.value))}
+            type="text"
+            inputMode="numeric"
+            value={section80DInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setSection80DInput(stripped)
+              setSection80D(Number(stripped))
+            }}
+            onFocus={(e) => setSection80DInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setSection80DInput(n > 0 ? formatNumber(n) : '0')
+            }}
           />
           <div>
             <Input
               label="NPS — Voluntary Contribution (80CCD 1B)"
               prefix="₹"
-              type="number"
-              value={nps}
-              onChange={(e) => setNps(Number(e.target.value))}
+              type="text"
+              inputMode="numeric"
+              value={npsInput}
+              onChange={(e) => {
+                const stripped = e.target.value.replace(/[^0-9]/g, '')
+                setNpsInput(stripped)
+                setNps(Number(stripped))
+              }}
+              onFocus={(e) => setNpsInput(e.target.value.replace(/,/g, ''))}
+              onBlur={(e) => {
+                const n = Number(e.target.value.replace(/,/g, ''))
+                setNpsInput(n > 0 ? formatNumber(n) : '0')
+              }}
               suffix="/ 50k"
             />
             <p className="text-xs text-secondary mt-1">Your personal top-up contribution to NPS, separate from employer's.</p>
@@ -236,9 +307,19 @@ export function TaxDeductions() {
             <Input
               label="Employer NPS — also deductible in New Regime (80CCD 2)"
               prefix="₹"
-              type="number"
-              value={employerNps}
-              onChange={(e) => setEmployerNps(Number(e.target.value))}
+              type="text"
+              inputMode="numeric"
+              value={employerNpsInput}
+              onChange={(e) => {
+                const stripped = e.target.value.replace(/[^0-9]/g, '')
+                setEmployerNpsInput(stripped)
+                setEmployerNps(Number(stripped))
+              }}
+              onFocus={(e) => setEmployerNpsInput(e.target.value.replace(/,/g, ''))}
+              onBlur={(e) => {
+                const n = Number(e.target.value.replace(/,/g, ''))
+                setEmployerNpsInput(n > 0 ? formatNumber(n) : '0')
+              }}
               suffix={`/ ${((basicSalary * 0.14) / 1000).toFixed(0)}k`}
             />
             <p className="text-xs text-secondary mt-1">New Regime cap: 14% of Basic · Old Regime cap: 10% of Basic</p>
