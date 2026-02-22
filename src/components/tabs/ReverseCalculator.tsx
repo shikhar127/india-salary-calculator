@@ -13,6 +13,7 @@ export function ReverseCalculator() {
   const [targetInput, setTargetInput] = useState<string>(formatNumber(100000))
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
 
   const targetInHand = targetValue
 
@@ -86,25 +87,38 @@ export function ReverseCalculator() {
             placeholder="e.g. 1,00,000"
           />
 
-          {/* State */}
-          <Select
-            label="State"
-            value={selectedState}
-            onChange={(e) => setSelectedState(e.target.value)}
-            options={STATES.map((s) => ({ label: s.name, value: s.name }))}
-          />
-
-          {/* PF mode */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
-            <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
-            <Toggle
-              value={pfMode === 'full'}
-              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
-              leftLabel="₹1,800/mo"
-              rightLabel="12% of basic"
-            />
-          </div>
+          <button
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1"
+          >
+            <span>Advanced Options</span>
+            <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
+          </button>
+          {!showAdvanced && (
+            <p className="text-xs text-secondary -mt-1">
+              State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
+            </p>
+          )}
+          {showAdvanced && (
+            <>
+              <Select
+                label="State"
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+              />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
+                <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
+                <Toggle
+                  value={pfMode === 'full'}
+                  onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+                  leftLabel="₹1,800/mo"
+                  rightLabel="12% of basic"
+                />
+              </div>
+            </>
+          )}
         </div>
       </Card>
 

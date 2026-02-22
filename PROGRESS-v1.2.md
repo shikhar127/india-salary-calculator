@@ -4,7 +4,7 @@
 
 - [x] Sprint 1: Empty State Detection & Primary Input Highlighting
 - [x] Sprint 2: Minimal Input & Smart Defaults - Salary Tab
-- [ ] Sprint 3: Progressive Reveal - Hike & Reverse Tabs
+- [x] Sprint 3: Progressive Reveal - Hike & Reverse Tabs
 - [ ] Sprint 4: Tax Tab - Simplified Flow (Part 1)
 - [ ] Sprint 5: Tax Tab - Progressive Deductions (Part 2)
 - [ ] Sprint 6: Polish, Testing & Deploy
@@ -33,3 +33,12 @@
 - PF Mode: Capped ₹1,800/mo (default)
 - "More Options" collapsed by default
 - CTC is the only required input - results appear immediately with defaults
+
+### ✅ Sprint 3: Progressive Reveal - Hike & Reverse Tabs
+- Hike tab: Added "Advanced Options" collapsible section
+- Reverse tab: Added "Advanced Options" collapsible section
+- Primary inputs always visible (CTC + Hike %, or Desired In-Hand)
+- State and PF options hidden in Advanced section by default
+- Show assumptions summary when collapsed
+- Pattern matches Salary tab "More Options" design
+- Cleaner initial UI, less overwhelming for new users

@@ -16,6 +16,7 @@ export function HikeCompare({ savedCtc }: { savedCtc?: number | null }) {
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
 
   const calcInHand = (ctc: number): number => {
     const basic = ctc * (basicPercent / 100)
@@ -64,32 +65,49 @@ export function HikeCompare({ savedCtc }: { savedCtc?: number | null }) {
             value={hikePercent}
             onChange={(e) => setHikePercent(Number(e.target.value))}
           />
-          {pfMode === 'full' && (
-            <Input
-              label="Basic Salary %"
-              suffix="%"
-              type="number"
-              value={basicPercent}
-              onChange={(e) => setBasicPercent(Number(e.target.value))}
-              placeholder="40–60%"
-            />
+          <button
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1"
+          >
+            <span>Advanced Options</span>
+            <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
+          </button>
+          {!showAdvanced && (
+            <p className="text-xs text-secondary -mt-1">
+              State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
+              {pfMode === 'full' && ` · Basic: ${basicPercent}%`}
+            </p>
           )}
-          <Select
-            label="State"
-            value={selectedState}
-            onChange={(e) => setSelectedState(e.target.value)}
-            options={STATES.map((s) => ({ label: s.name, value: s.name }))}
-          />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
-            <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
-            <Toggle
-              value={pfMode === 'full'}
-              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
-              leftLabel="₹1,800/mo"
-              rightLabel="12% of basic"
-            />
-          </div>
+          {showAdvanced && (
+            <>
+              <Select
+                label="State"
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+              />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
+                <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
+                <Toggle
+                  value={pfMode === 'full'}
+                  onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+                  leftLabel="₹1,800/mo"
+                  rightLabel="12% of basic"
+                />
+              </div>
+              {pfMode === 'full' && (
+                <Input
+                  label="Basic Salary %"
+                  suffix="%"
+                  type="number"
+                  value={basicPercent}
+                  onChange={(e) => setBasicPercent(Number(e.target.value))}
+                  placeholder="40–60%"
+                />
+              )}
+            </>
+          )}
         </div>
       </Card>
 
