@@ -98,23 +98,27 @@ function App() {
   return (
     <div className="min-h-screen bg-bg-primary text-primary font-sans selection:bg-accent-green selection:text-black">
       <main className="max-w-md mx-auto min-h-screen bg-bg-primary relative shadow-2xl overflow-x-hidden">
-        {/* Scrollable Content */}
-        <div className="px-6 py-4 pb-28">
-          {renderContent()}
-        </div>
+        {!showOnboarding && (
+          <>
+            {/* Scrollable Content */}
+            <div className="px-6 py-4 pb-28">
+              {renderContent()}
+            </div>
 
-        {/* Bottom Navigation — hides on scroll down, shows on scroll up */}
-        <nav
-          className={`fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 bg-black text-white pt-2 px-6 rounded-t-3xl transition-transform duration-300 ease-in-out will-change-transform [backface-visibility:hidden] ${navVisible ? 'translate-y-0' : 'translate-y-full'}`}
-          style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
-        >
-          <div className="flex justify-between items-center h-16">
-            <NavButton active={activeTab === 'salary'} onClick={() => handleTabChange('salary')} icon={<Calculator className="w-6 h-6" />} label="Salary" />
-            <NavButton active={activeTab === 'tax'} onClick={() => handleTabChange('tax')} icon={<FileText className="w-6 h-6" />} label="Tax" />
-            <NavButton active={activeTab === 'hike'} onClick={() => handleTabChange('hike')} icon={<TrendingUp className="w-6 h-6" />} label="Hike" />
-            <NavButton active={activeTab === 'reverse'} onClick={() => handleTabChange('reverse')} icon={<RotateCcw className="w-6 h-6" />} label="Reverse" />
-          </div>
-        </nav>
+            {/* Bottom Navigation — hides on scroll down, shows on scroll up */}
+            <nav
+              className={`fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 bg-black text-white pt-2 px-6 rounded-t-3xl transition-transform duration-300 ease-in-out will-change-transform [backface-visibility:hidden] ${navVisible ? 'translate-y-0' : 'translate-y-full'}`}
+              style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
+            >
+              <div className="flex justify-between items-center h-16">
+                <NavButton active={activeTab === 'salary'} onClick={() => handleTabChange('salary')} icon={<Calculator className="w-6 h-6" />} label="Salary" />
+                <NavButton active={activeTab === 'tax'} onClick={() => handleTabChange('tax')} icon={<FileText className="w-6 h-6" />} label="Tax" />
+                <NavButton active={activeTab === 'hike'} onClick={() => handleTabChange('hike')} icon={<TrendingUp className="w-6 h-6" />} label="Hike" />
+                <NavButton active={activeTab === 'reverse'} onClick={() => handleTabChange('reverse')} icon={<RotateCcw className="w-6 h-6" />} label="Reverse" />
+              </div>
+            </nav>
+          </>
+        )}
 
         {showOnboarding && <OnboardingModal onComplete={handleOnboardingComplete} />}
       </main>
