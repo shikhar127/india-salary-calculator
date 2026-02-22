@@ -5,8 +5,8 @@
 - [x] Sprint 1: Empty State Detection & Primary Input Highlighting
 - [x] Sprint 2: Minimal Input & Smart Defaults - Salary Tab
 - [x] Sprint 3: Progressive Reveal - Hike & Reverse Tabs
-- [ ] Sprint 4: Tax Tab - Simplified Flow (Part 1)
-- [ ] Sprint 5: Tax Tab - Progressive Deductions (Part 2)
+- [x] Sprint 4: Tax Tab - Simplified Flow (Part 1)
+- [x] Sprint 5: Tax Tab - Progressive Deductions (Part 2)
 - [ ] Sprint 6: Polish, Testing & Deploy
 
 ---
@@ -42,3 +42,16 @@
 - Show assumptions summary when collapsed
 - Pattern matches Salary tab "More Options" design
 - Cleaner initial UI, less overwhelming for new users
+
+### ✅ Sprint 4 & 5: Tax Tab - Simplified Flow + Progressive Deductions
+- Replaced "Gross Annual Income" with "Annual CTC" input
+- Added PF Calculation toggle (₹18,000 cap vs 12% of basic)
+- Auto-calculate gross income from CTC and PF choice
+- Show regime recommendation immediately with zero deductions
+- Added "Customize Deductions" collapsible section (optional)
+- All deductions default to zero
+- Progressive reveal: CTC → Recommendation → Optional deduction customization
+- HRA section simplified with basic salary auto-calculated from CTC
+- Summary line shows current deductions when collapsed
+- Maintained all existing calculation logic and features
+- Much simpler initial UX focused on CTC as primary input
