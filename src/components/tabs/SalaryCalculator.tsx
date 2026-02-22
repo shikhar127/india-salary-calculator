@@ -251,7 +251,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
       </Card>
 
       {ctc === 0 ? (
-        <div className="text-center py-16 px-6">
+        <div className="text-center pt-6 pb-10 px-6">
           <h3 className="text-2xl font-bold mb-3">Calculate Your Take-Home Salary</h3>
           <p className="text-secondary text-sm mb-8 max-w-sm mx-auto">
             Enter your Annual CTC below to see your detailed salary breakdown with tax calculations
