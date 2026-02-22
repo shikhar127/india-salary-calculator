@@ -43,15 +43,10 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
 
   useEffect(() => {
     if (savedCtc && savedCtc > 0) {
-      const normalizedInput = ctcInput.replace(/,/g, '')
-      if (savedCtc !== ctc) {
-        setCtc(savedCtc)
-      }
-      if (normalizedInput !== String(savedCtc)) {
-        setCtcInput(formatNumber(savedCtc))
-      }
+      setCtc(savedCtc)
+      setCtcInput(formatNumber(savedCtc))
     }
-  }, [savedCtc, ctc, ctcInput])
+  }, [savedCtc])
 
   useEffect(() => {
     if (onCtcChange) {
