@@ -8,9 +8,8 @@ import { Button } from '../ui/Button'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount, RowAmount } from '../ui/DisplayAmount'
 import { STATES } from '../../utils/constants'
-import { formatIndianCurrency, formatShorthand, formatNumber } from '../../utils/formatting'
+import { formatIndianCurrency, formatShorthand } from '../../utils/formatting'
 import { calculateSalaryBreakdown, SalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
-import { ProfessionalTaxMode } from '../../utils/professionalTax'
 import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../../utils/ctcInput'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
@@ -23,13 +22,9 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
   const [variablePay, setVariablePay] = useState<number>(0)
   const [isMetro, setIsMetro] = useState<boolean>(true)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [showAnnual, setShowAnnual] = useState<boolean>(false)
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [taxRegime, setTaxRegime] = useState<TaxRegime>('new')
-  const [professionalTaxMode, setProfessionalTaxMode] = useState<ProfessionalTaxMode>('state')
-  const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
-  const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
   const [results, setResults] = useState<SalaryBreakdown | null>(null)
   const [copied, setCopied] = useState<boolean>(false)
 
@@ -67,8 +62,8 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
       stateName: selectedState,
       pfMode,
       taxRegime,
-      professionalTaxMode,
-      manualProfessionalTaxAnnual,
+      professionalTaxMode: 'state',
+      manualProfessionalTaxAnnual: 0,
     })
 
     setResults(breakdown)
@@ -80,8 +75,6 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     selectedState,
     pfMode,
     taxRegime,
-    professionalTaxMode,
-    manualProfessionalTaxAnnual,
   ])
 
   const handleShare = async () => {
@@ -206,101 +199,54 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
             </div>
           </div>
 
-          <button
-            onClick={() => setShowAdvanced((v) => !v)}
-            className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1"
-          >
-            <span>More Options</span>
-            <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
-          </button>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
+            <Toggle
+              value={pfMode === 'full'}
+              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+              leftLabel="₹1,800/mo"
+              rightLabel="12% of basic"
+            />
+          </div>
 
-          {!showAdvanced && (
-            <p className="text-xs text-secondary -mt-1">
-              {isMetro ? 'Metro' : 'Non-Metro'} · {selectedState} · {taxRegime === 'new' ? 'New' : 'Old'} regime · PF {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
-            </p>
-          )}
+          <Input
+            label="Variable Pay (Annual)"
+            prefix="₹"
+            type="number"
+            value={variablePay}
+            onChange={(e) => setVariablePay(Number(e.target.value))}
+          />
 
-          {showAdvanced && (
-            <>
-              <Input
-                label="Variable Pay (Annual)"
-                prefix="₹"
-                type="number"
-                value={variablePay}
-                onChange={(e) => setVariablePay(Number(e.target.value))}
-              />
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label="Tax Regime"
+              value={taxRegime}
+              onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
+              options={[
+                { label: 'New Regime', value: 'new' },
+                { label: 'Old Regime', value: 'old' },
+              ]}
+            />
+            <Select
+              label="City Type"
+              value={isMetro ? 'metro' : 'non-metro'}
+              onChange={(e) => setIsMetro(e.target.value === 'metro')}
+              options={[
+                { label: 'Metro', value: 'metro' },
+                { label: 'Non-Metro', value: 'non-metro' },
+              ]}
+            />
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Select
-                  label="Tax Regime"
-                  value={taxRegime}
-                  onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
-                  options={[
-                    { label: 'New Regime', value: 'new' },
-                    { label: 'Old Regime', value: 'old' },
-                  ]}
-                />
-                <Select
-                  label="City Type"
-                  value={isMetro ? 'metro' : 'non-metro'}
-                  onChange={(e) => setIsMetro(e.target.value === 'metro')}
-                  options={[
-                    { label: 'Metro', value: 'metro' },
-                    { label: 'Non-Metro', value: 'non-metro' },
-                  ]}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Select
-                  label="State"
-                  value={selectedState}
-                  onChange={(e) => setSelectedState(e.target.value)}
-                  options={STATES.map((s) => ({ label: s.name, value: s.name }))}
-                />
-                <Select
-                  label="Professional Tax"
-                  value={professionalTaxMode}
-                  onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
-                  options={[
-                    { label: 'State estimate', value: 'state' },
-                    { label: 'Manual annual', value: 'manual' },
-                  ]}
-                />
-              </div>
-
-              {professionalTaxMode === 'manual' && (
-                <Input
-                  label="Professional Tax (Annual)"
-                  prefix="₹"
-                  type="text"
-                  inputMode="numeric"
-                  value={manualProfessionalTaxAnnualInput}
-                  onChange={(e) => {
-                    const cleaned = e.target.value.replace(/[^0-9]/g, '')
-                    setManualProfessionalTaxAnnualInput(cleaned)
-                    setManualProfessionalTaxAnnual(Number(cleaned))
-                  }}
-                  onFocus={(e) => setManualProfessionalTaxAnnualInput(e.target.value.replace(/,/g, ''))}
-                  onBlur={(e) => {
-                    const n = Number(e.target.value.replace(/,/g, ''))
-                    setManualProfessionalTaxAnnualInput(n > 0 ? formatNumber(n) : '')
-                  }}
-                />
-              )}
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
-                <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
-                <Toggle
-                  value={pfMode === 'full'}
-                  onChange={(v) => setPfMode(v ? 'full' : 'capped')}
-                  leftLabel="₹1,800/mo"
-                  rightLabel="12% of basic"
-                />
-              </div>
-            </>
-          )}
+          <Select
+            label="State"
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+            options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+          />
+          <p className="text-xs text-secondary -mt-1">
+            Professional tax is auto-estimated from selected state.
+          </p>
         </div>
       </Card>
 
