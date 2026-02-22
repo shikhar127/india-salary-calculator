@@ -168,6 +168,21 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
           </div>
         )}
 
+        {ctc > 0 && (
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <Card className={comparison.better === 'new' ? 'ring-2 ring-accent-green' : ''}>
+              <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">New Regime</p>
+              <DisplayAmount amount={comparison.new.totalTax} size="md" />
+              <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
+            </Card>
+            <Card className={comparison.better === 'old' ? 'ring-2 ring-accent-green' : ''}>
+              <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">Old Regime</p>
+              <DisplayAmount amount={comparison.old.totalTax} size="md" />
+              <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
+            </Card>
+          </div>
+        )}
+
         <Card className="space-y-4 mb-6">
           <div>
             <Input
@@ -256,19 +271,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <Card className={comparison.better === 'new' ? 'ring-2 ring-accent-green' : ''}>
-                <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">New Regime</p>
-                <DisplayAmount amount={comparison.new.totalTax} size="md" />
-                <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
-              </Card>
-              <Card className={comparison.better === 'old' ? 'ring-2 ring-accent-green' : ''}>
-                <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">Old Regime</p>
-                <DisplayAmount amount={comparison.old.totalTax} size="md" />
-                <p className="text-xs text-secondary mt-1.5">Tax Payable</p>
-              </Card>
-            </div>
-
             <div className="mb-4">
               <button
                 onClick={() => setShowDeductions(!showDeductions)}
