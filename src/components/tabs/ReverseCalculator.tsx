@@ -122,6 +122,25 @@ export function ReverseCalculator() {
             placeholder="e.g. 1,00,000"
           />
 
+          <Input
+            label="Basic Salary %"
+            suffix="%"
+            type="number"
+            value={basicPercent}
+            onChange={(e) => setBasicPercent(Number(e.target.value))}
+            placeholder="40–60%"
+          />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
+            <Toggle
+              value={pfMode === 'full'}
+              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+              leftLabel="₹1,800/mo"
+              rightLabel="12% of basic"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Select
@@ -135,11 +154,12 @@ export function ReverseCalculator() {
               />
               <p className="text-[11px] text-secondary mt-1">Default: New Regime (recommended for most users)</p>
             </div>
-            <Select
-              label="State"
-              value={selectedState}
-              onChange={(e) => setSelectedState(e.target.value)}
-              options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+            <Input
+              label="Variable Pay (Annual)"
+              prefix="₹"
+              type="number"
+              value={variablePay}
+              onChange={(e) => setVariablePay(Number(e.target.value))}
             />
           </div>
 
@@ -153,44 +173,23 @@ export function ReverseCalculator() {
                 { label: 'Non-Metro', value: 'non-metro' },
               ]}
             />
-            <Input
-              label="Basic Salary %"
-              suffix="%"
-              type="number"
-              value={basicPercent}
-              onChange={(e) => setBasicPercent(Number(e.target.value))}
-              placeholder="40–60%"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Variable Pay (Annual)"
-              prefix="₹"
-              type="number"
-              value={variablePay}
-              onChange={(e) => setVariablePay(Number(e.target.value))}
-            />
             <Select
-              label="Professional Tax"
-              value={professionalTaxMode}
-              onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
-              options={[
-                { label: 'State estimate', value: 'state' },
-                { label: 'Manual annual', value: 'manual' },
-              ]}
+              label="State"
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              options={STATES.map((s) => ({ label: s.name, value: s.name }))}
             />
           </div>
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
-            <Toggle
-              value={pfMode === 'full'}
-              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
-              leftLabel="₹1,800/mo"
-              rightLabel="12% of basic"
-            />
-          </div>
+          <Select
+            label="Professional Tax"
+            value={professionalTaxMode}
+            onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
+            options={[
+              { label: 'State estimate', value: 'state' },
+              { label: 'Manual annual', value: 'manual' },
+            ]}
+          />
 
           {professionalTaxMode === 'manual' && (
             <Input
