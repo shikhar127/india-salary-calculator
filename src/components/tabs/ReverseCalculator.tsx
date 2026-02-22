@@ -68,7 +68,7 @@ export function ReverseCalculator() {
 
   return (
     <div className="space-y-6 pb-24 pt-4">
-      <h2 className="text-2xl font-bold">CTC Needed</h2>
+      <h2 className="text-2xl font-bold">Reverse Calculator</h2>
       <p className="text-secondary text-sm">
         Calculate required CTC for your desired monthly in-hand salary.
       </p>

@@ -1,0 +1,40 @@
+SalaryFit v1.0 - Build Information
+===================================
+
+Build Date: February 22, 2026
+Build Time: 16:41 IST
+Builder: Claude Code + Shikhar
+
+APK Details:
+- Filename: india-salary-calculator-v1.0.apk
+- Size: 3.2 MB
+- Package: com.shikhar.salarycalculator
+- Version Code: 1
+- Version Name: 1.0
+- Target SDK: 35 (Android 15)
+- Min SDK: 22 (Android 5.1+)
+
+Build Environment:
+- Java: OpenJDK 21.0.8
+- Gradle: 8.2.1
+- Android Build Tools: 35.0.0
+- Vite: 6.0.7
+- React: 19.0.0
+- Capacitor: 7.0.0
+
+Signed with:
+- Keystore: release.keystore
+- Alias: salary
+- Certificate: CN=Shikhar, OU=Personal, O=Personal
+
+Deployment:
+- APK: For Play Store / Direct Install
+- Web: https://shikhar127.github.io/india-salary-calculator/
+- GitHub: https://github.com/shikhar127/india-salary-calculator
+
+Features:
+- Kerala PT fix (₹2,500 → ₹1,200)
+- Comma formatting in CTC input
+- Auto-hide bottom navigation
+- All 24 UX fixes from audit
+- FY 2025-26 tax calculations
