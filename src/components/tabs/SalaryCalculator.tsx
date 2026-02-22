@@ -13,9 +13,9 @@ import { calculateTax, calcPF } from '../../utils/taxLogic'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
 
-export function SalaryCalculator() {
-  const [ctcInput, setCtcInput] = useState<string>(formatNumber(1200000))
-  const [ctc, setCtc] = useState<number>(1200000)
+export function SalaryCalculator({ savedCtc }: { savedCtc?: number | null }) {
+  const [ctcInput, setCtcInput] = useState<string>(formatNumber(savedCtc || 1200000))
+  const [ctc, setCtc] = useState<number>(savedCtc || 1200000)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [variablePay, setVariablePay] = useState<number>(0)
   const [isMetro, setIsMetro] = useState<boolean>(true)

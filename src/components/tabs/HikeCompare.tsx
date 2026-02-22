@@ -9,9 +9,9 @@ import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { STATES } from '../../utils/constants'
 import { TrendingUp, ArrowRight } from 'lucide-react'
 
-export function HikeCompare() {
-  const [currentCtc, setCurrentCtc] = useState<number>(1200000)
-  const [currentCtcInput, setCurrentCtcInput] = useState<string>(formatNumber(1200000))
+export function HikeCompare({ savedCtc }: { savedCtc?: number | null }) {
+  const [currentCtc, setCurrentCtc] = useState<number>(savedCtc || 1200000)
+  const [currentCtcInput, setCurrentCtcInput] = useState<string>(formatNumber(savedCtc || 1200000))
   const [hikePercent, setHikePercent] = useState<number>(30)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')

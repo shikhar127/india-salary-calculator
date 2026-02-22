@@ -13,6 +13,7 @@ import { SalaryCalculator } from './components/tabs/SalaryCalculator'
 import { TaxDeductions } from './components/tabs/TaxDeductions'
 import { HikeCompare } from './components/tabs/HikeCompare'
 import { ReverseCalculator } from './components/tabs/ReverseCalculator'
+import { OnboardingModal } from './components/OnboardingModal'
 
 type Tab = 'salary' | 'tax' | 'hike' | 'reverse'
 
@@ -20,6 +21,19 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('salary')
   const [navVisible, setNavVisible] = useState(true)
   const lastScrollY = useRef(0)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [savedCtc, setSavedCtc] = useState<number | null>(null)
+
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding')
+    const storedCtc = localStorage.getItem('savedCtc')
+
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true)
+    } else if (storedCtc) {
+      setSavedCtc(Number(storedCtc))
+    }
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,11 +56,20 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
+  const handleOnboardingComplete = (ctc: number | null) => {
+    localStorage.setItem('hasSeenOnboarding', 'true')
+    if (ctc) {
+      localStorage.setItem('savedCtc', ctc.toString())
+      setSavedCtc(ctc)
+    }
+    setShowOnboarding(false)
+  }
+
   const renderContent = () => {
     switch (activeTab) {
-      case 'salary': return <SalaryCalculator />
+      case 'salary': return <SalaryCalculator savedCtc={savedCtc} />
       case 'tax': return <TaxDeductions />
-      case 'hike': return <HikeCompare />
+      case 'hike': return <HikeCompare savedCtc={savedCtc} />
       case 'reverse': return <ReverseCalculator />
     }
   }
@@ -71,6 +94,8 @@ function App() {
             <NavButton active={activeTab === 'reverse'} onClick={() => handleTabChange('reverse')} icon={<RotateCcw className="w-6 h-6" />} label="Reverse" />
           </div>
         </nav>
+
+        {showOnboarding && <OnboardingModal onComplete={handleOnboardingComplete} />}
       </main>
     </div>
   )

@@ -6,7 +6,7 @@
 - [x] Sprint 2: Currency Formatting in Tax Tab
 - [x] Sprint 3: Currency Formatting in Hike & Reverse Tabs
 - [x] Sprint 4: Hike Calculator Enhancement
-- [ ] Sprint 5: Onboarding CTC Capture
+- [x] Sprint 5: Onboarding CTC Capture
 - [ ] Sprint 6: Testing, Build & Deploy
 
 ---
@@ -40,3 +40,13 @@
 - Shows hike percentage alongside: (XX%)
 - Positioned above Current → After Hike section with border separator
 - Improved visual hierarchy for key metrics
+
+### ✅ Sprint 5: Onboarding CTC Capture
+- Created OnboardingModal component with CTC input
+- Implemented localStorage check for first-launch detection
+- Added "Skip" and "Continue" buttons
+- Integrated modal into App.tsx with state management
+- Pre-fill SalaryCalculator with saved CTC
+- Pre-fill HikeCompare with saved CTC
+- Modal appears only on first visit
+- CTC persists across sessions via localStorage
