@@ -14,7 +14,6 @@ export function ReverseCalculator() {
   const [targetInput, setTargetInput] = useState<string>('')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [variablePay, setVariablePay] = useState<number>(0)
   const [isMetro, setIsMetro] = useState<boolean>(true)
@@ -92,6 +91,13 @@ export function ReverseCalculator() {
       <h2 className="text-2xl font-bold">Reverse Calculator</h2>
       <p className="text-secondary text-sm">Calculate required CTC for your desired monthly in-hand salary.</p>
 
+      {targetValue > 0 && result && (
+        <div className="text-center py-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em] mb-3">You need a CTC of</p>
+          <DisplayAmount amount={result.ctc} size="hero" suffix="/yr" showWords />
+        </div>
+      )}
+
       <Card>
         <div className="space-y-5">
           <Input
@@ -116,111 +122,94 @@ export function ReverseCalculator() {
             placeholder="e.g. 1,00,000"
           />
 
-          <button
-            onClick={() => setShowAdvanced((v) => !v)}
-            className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1"
-          >
-            <span>Advanced Options</span>
-            <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
-          </button>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Select
+                label="Tax Regime"
+                value={taxRegime}
+                onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
+                options={[
+                  { label: 'New Regime', value: 'new' },
+                  { label: 'Old Regime', value: 'old' },
+                ]}
+              />
+              <p className="text-[11px] text-secondary mt-1">Default: New Regime (recommended for most users)</p>
+            </div>
+            <Select
+              label="State"
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+            />
+          </div>
 
-          {!showAdvanced && (
-            <p className="text-xs text-secondary -mt-1">
-              {taxRegime === 'new' ? 'New' : 'Old'} regime · {isMetro ? 'Metro' : 'Non-Metro'} · State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800 /mo' : '12% of basic'}
-            </p>
-          )}
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label="City Type"
+              value={isMetro ? 'metro' : 'non-metro'}
+              onChange={(e) => setIsMetro(e.target.value === 'metro')}
+              options={[
+                { label: 'Metro', value: 'metro' },
+                { label: 'Non-Metro', value: 'non-metro' },
+              ]}
+            />
+            <Input
+              label="Basic Salary %"
+              suffix="%"
+              type="number"
+              value={basicPercent}
+              onChange={(e) => setBasicPercent(Number(e.target.value))}
+              placeholder="40–60%"
+            />
+          </div>
 
-          {showAdvanced && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Select
-                    label="Tax Regime"
-                    value={taxRegime}
-                    onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
-                    options={[
-                      { label: 'New Regime', value: 'new' },
-                      { label: 'Old Regime', value: 'old' },
-                    ]}
-                  />
-                  <p className="text-[11px] text-secondary mt-1">Default: New Regime (recommended for most users)</p>
-                </div>
-                <Select
-                  label="State"
-                  value={selectedState}
-                  onChange={(e) => setSelectedState(e.target.value)}
-                  options={STATES.map((s) => ({ label: s.name, value: s.name }))}
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Variable Pay (Annual)"
+              prefix="₹"
+              type="number"
+              value={variablePay}
+              onChange={(e) => setVariablePay(Number(e.target.value))}
+            />
+            <Select
+              label="Professional Tax"
+              value={professionalTaxMode}
+              onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
+              options={[
+                { label: 'State estimate', value: 'state' },
+                { label: 'Manual annual', value: 'manual' },
+              ]}
+            />
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Select
-                  label="City Type"
-                  value={isMetro ? 'metro' : 'non-metro'}
-                  onChange={(e) => setIsMetro(e.target.value === 'metro')}
-                  options={[
-                    { label: 'Metro', value: 'metro' },
-                    { label: 'Non-Metro', value: 'non-metro' },
-                  ]}
-                />
-                <Input
-                  label="Basic Salary %"
-                  suffix="%"
-                  type="number"
-                  value={basicPercent}
-                  onChange={(e) => setBasicPercent(Number(e.target.value))}
-                  placeholder="40–60%"
-                />
-              </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
+            <Toggle
+              value={pfMode === 'full'}
+              onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+              leftLabel="₹1,800/mo"
+              rightLabel="12% of basic"
+            />
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Variable Pay (Annual)"
-                  prefix="₹"
-                  type="number"
-                  value={variablePay}
-                  onChange={(e) => setVariablePay(Number(e.target.value))}
-                />
-                <Select
-                  label="Professional Tax"
-                  value={professionalTaxMode}
-                  onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
-                  options={[
-                    { label: 'State estimate', value: 'state' },
-                    { label: 'Manual annual', value: 'manual' },
-                  ]}
-                />
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
-                  <Toggle
-                    value={pfMode === 'full'}
-                    onChange={(v) => setPfMode(v ? 'full' : 'capped')}
-                    leftLabel="₹1,800/mo"
-                    rightLabel="12% of basic"
-                  />
-                </div>
-              </div>
-
-              {professionalTaxMode === 'manual' && (
-                <Input
-                  label="Professional Tax (Annual)"
-                  prefix="₹"
-                  type="text"
-                  inputMode="numeric"
-                  value={manualProfessionalTaxAnnualInput}
-                  onChange={(e) => {
-                    const cleaned = e.target.value.replace(/[^0-9]/g, '')
-                    setManualProfessionalTaxAnnualInput(cleaned)
-                    setManualProfessionalTaxAnnual(Number(cleaned))
-                  }}
-                  onFocus={(e) => setManualProfessionalTaxAnnualInput(e.target.value.replace(/,/g, ''))}
-                  onBlur={(e) => {
-                    const n = Number(e.target.value.replace(/,/g, ''))
-                    setManualProfessionalTaxAnnualInput(n > 0 ? formatNumber(n) : '')
-                  }}
-                />
-              )}
-            </>
+          {professionalTaxMode === 'manual' && (
+            <Input
+              label="Professional Tax (Annual)"
+              prefix="₹"
+              type="text"
+              inputMode="numeric"
+              value={manualProfessionalTaxAnnualInput}
+              onChange={(e) => {
+                const cleaned = e.target.value.replace(/[^0-9]/g, '')
+                setManualProfessionalTaxAnnualInput(cleaned)
+                setManualProfessionalTaxAnnual(Number(cleaned))
+              }}
+              onFocus={(e) => setManualProfessionalTaxAnnualInput(e.target.value.replace(/,/g, ''))}
+              onBlur={(e) => {
+                const n = Number(e.target.value.replace(/,/g, ''))
+                setManualProfessionalTaxAnnualInput(n > 0 ? formatNumber(n) : '')
+              }}
+            />
           )}
         </div>
       </Card>
@@ -232,14 +221,9 @@ export function ReverseCalculator() {
             Enter your desired monthly in-hand salary to calculate the CTC you need
           </p>
         </div>
-      ) : (
+        ) : (
         result && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center py-6">
-              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em] mb-3">You need a CTC of</p>
-              <DisplayAmount amount={result.ctc} size="hero" suffix="/yr" showWords />
-            </div>
-
             <Card className="bg-bg-secondary border-transparent">
               <h3 className="font-bold mb-3 text-sm">Estimated Deductions ({taxRegime === 'new' ? 'New' : 'Old'} Regime)</h3>
               <div className="space-y-3">
