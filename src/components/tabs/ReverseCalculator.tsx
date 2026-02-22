@@ -4,7 +4,6 @@ import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
-import { SuggestionChips } from '../ui/SuggestionChips'
 import { formatIndianCurrency, formatNumber } from '../../utils/formatting'
 import { STATES } from '../../utils/constants'
 import { calculateSalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
@@ -23,19 +22,8 @@ export function ReverseCalculator() {
   const [professionalTaxMode, setProfessionalTaxMode] = useState<ProfessionalTaxMode>('state')
   const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
   const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
-  const monthlyIncrementOptions = [
-    { label: '+10K', value: '10000' },
-    { label: '+25K', value: '25000' },
-    { label: '+1L', value: '100000' },
-  ]
 
   const targetInHand = targetValue
-  const applyMonthlyIncrement = (incrementValue: string) => {
-    const increment = Number(incrementValue)
-    const nextValue = Math.max(0, targetValue + increment)
-    setTargetValue(nextValue)
-    setTargetInput(formatNumber(nextValue))
-  }
 
   const result = useMemo(() => {
     if (targetValue <= 0) return null
@@ -126,11 +114,6 @@ export function ReverseCalculator() {
               setTargetInput(n > 0 ? formatNumber(n) : '')
             }}
             placeholder="e.g. 1,00,000"
-          />
-          <SuggestionChips
-            label="Quick add"
-            options={monthlyIncrementOptions}
-            onPick={applyMonthlyIncrement}
           />
 
           <button
