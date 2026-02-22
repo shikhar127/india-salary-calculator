@@ -3,7 +3,7 @@
 ## Sprint Status
 
 - [x] Sprint 1: Empty State Detection & Primary Input Highlighting
-- [ ] Sprint 2: Minimal Input & Smart Defaults - Salary Tab
+- [x] Sprint 2: Minimal Input & Smart Defaults - Salary Tab
 - [ ] Sprint 3: Progressive Reveal - Hike & Reverse Tabs
 - [ ] Sprint 4: Tax Tab - Simplified Flow (Part 1)
 - [ ] Sprint 5: Tax Tab - Progressive Deductions (Part 2)
@@ -23,3 +23,13 @@
 - Moved input cards to top (always visible)
 - Added smooth fade-in animations for results
 - Conditional rendering based on primary input values
+
+### ✅ Sprint 2: Minimal Input & Smart Defaults - Salary Tab
+- Verified all smart defaults are in place
+- Basic %: 50% (default)
+- Variable Pay: ₹0 (default)
+- City Type: Metro (default)
+- State: Maharashtra (default)
+- PF Mode: Capped ₹1,800/mo (default)
+- "More Options" collapsed by default
+- CTC is the only required input - results appear immediately with defaults
