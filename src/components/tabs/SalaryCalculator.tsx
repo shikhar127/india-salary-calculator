@@ -132,40 +132,6 @@ export function SalaryCalculator({ savedCtc }: { savedCtc?: number | null }) {
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Hero Section */}
-      <div className="text-center space-y-1 pt-6">
-        <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em]">
-          {showAnnual ? 'Annual Take Home' : 'Monthly In-Hand'}
-        </p>
-        <div className="py-2">
-          {results ? (
-            <DisplayAmount
-              amount={showAnnual ? results.annualInHand : results.monthlyInHand}
-              size="hero"
-              suffix={showAnnual ? '/yr' : '/mo'}
-              showWords
-            />
-          ) : (
-            <p className="text-secondary text-sm py-6">Enter your CTC to see your breakdown</p>
-          )}
-        </div>
-        {results && (
-          <div className="flex justify-center pt-1">
-            <span className="text-xs font-medium px-3 py-1 bg-bg-secondary rounded-full text-secondary">
-              New tax regime · compare in Tax tab
-            </span>
-          </div>
-        )}
-        <div className="flex justify-center pt-3">
-          <Toggle
-            value={showAnnual}
-            onChange={setShowAnnual}
-            leftLabel="Monthly"
-            rightLabel="Annual"
-          />
-        </div>
-      </div>
-
       {/* Inputs */}
       <Card>
         <div className="space-y-4">
@@ -251,7 +217,50 @@ export function SalaryCalculator({ savedCtc }: { savedCtc?: number | null }) {
         </div>
       </Card>
 
-      {results && (
+      {ctc === 0 ? (
+        <div className="text-center py-16 px-6">
+          <h3 className="text-2xl font-bold mb-3">Calculate Your Take-Home Salary</h3>
+          <p className="text-secondary text-sm mb-8 max-w-sm mx-auto">
+            Enter your Annual CTC below to see your detailed salary breakdown with tax calculations
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Hero Section */}
+          <div className="text-center space-y-1 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em]">
+              {showAnnual ? 'Annual Take Home' : 'Monthly In-Hand'}
+            </p>
+            <div className="py-2">
+              {results ? (
+                <DisplayAmount
+                  amount={showAnnual ? results.annualInHand : results.monthlyInHand}
+                  size="hero"
+                  suffix={showAnnual ? '/yr' : '/mo'}
+                  showWords
+                />
+              ) : (
+                <p className="text-secondary text-sm py-6">Calculating...</p>
+              )}
+            </div>
+            {results && (
+              <div className="flex justify-center pt-1">
+                <span className="text-xs font-medium px-3 py-1 bg-bg-secondary rounded-full text-secondary">
+                  New tax regime · compare in Tax tab
+                </span>
+              </div>
+            )}
+            <div className="flex justify-center pt-3">
+              <Toggle
+                value={showAnnual}
+                onChange={setShowAnnual}
+                leftLabel="Monthly"
+                rightLabel="Annual"
+              />
+            </div>
+          </div>
+
+          {results && (
         <>
           {/* Salary Breakdown */}
           <div className="space-y-3">
@@ -346,6 +355,8 @@ export function SalaryCalculator({ savedCtc }: { savedCtc?: number | null }) {
             </Button>
           </div>
         </>
+      )}
+      </>
       )}
     </div>
   )

@@ -64,45 +64,7 @@ export function ReverseCalculator() {
         Calculate required CTC for your desired monthly in-hand salary.
       </p>
 
-      {/* Result on top */}
-      {result ? (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="text-center py-6">
-            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em] mb-3">
-              You need a CTC of
-            </p>
-            <DisplayAmount amount={result.ctc} size="hero" suffix="/yr" showWords />
-          </div>
-
-          <Card className="bg-bg-secondary border-transparent">
-            <h3 className="font-bold mb-3 text-sm">Estimated Deductions (New Regime)</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-secondary">Income Tax</span>
-                <span className="font-semibold">{formatIndianCurrency(result.tax)}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-secondary">
-                  Provident Fund {pfMode === 'capped' ? '(statutory cap)' : '(12% of basic)'}
-                </span>
-                <span className="font-semibold">{formatIndianCurrency(result.pf)}</span>
-              </div>
-              {result.pt > 0 && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-secondary">Professional Tax ({selectedState})</span>
-                  <span className="font-semibold">{formatIndianCurrency(result.pt)}</span>
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      ) : (
-        <div className="text-center py-10">
-          <p className="text-secondary text-sm">Enter a desired salary below to calculate</p>
-        </div>
-      )}
-
-      {/* Inputs below */}
+      {/* Inputs first */}
       <Card>
         <div className="space-y-5">
           <Input
@@ -145,6 +107,48 @@ export function ReverseCalculator() {
           </div>
         </div>
       </Card>
+
+      {targetValue === 0 ? (
+        <div className="text-center py-16 px-6">
+          <h3 className="text-2xl font-bold mb-3">Find Your Required CTC</h3>
+          <p className="text-secondary text-sm mb-8 max-w-sm mx-auto">
+            Enter your desired monthly in-hand salary to calculate the CTC you need
+          </p>
+        </div>
+      ) : (
+        result && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center py-6">
+              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em] mb-3">
+                You need a CTC of
+              </p>
+              <DisplayAmount amount={result.ctc} size="hero" suffix="/yr" showWords />
+            </div>
+
+            <Card className="bg-bg-secondary border-transparent">
+              <h3 className="font-bold mb-3 text-sm">Estimated Deductions (New Regime)</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-secondary">Income Tax</span>
+                  <span className="font-semibold">{formatIndianCurrency(result.tax)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-secondary">
+                    Provident Fund {pfMode === 'capped' ? '(statutory cap)' : '(12% of basic)'}
+                  </span>
+                  <span className="font-semibold">{formatIndianCurrency(result.pf)}</span>
+                </div>
+                {result.pt > 0 && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-secondary">Professional Tax ({selectedState})</span>
+                    <span className="font-semibold">{formatIndianCurrency(result.pt)}</span>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        )
+      )}
     </div>
   )
 }
