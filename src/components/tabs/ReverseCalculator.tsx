@@ -23,18 +23,18 @@ export function ReverseCalculator() {
   const [professionalTaxMode, setProfessionalTaxMode] = useState<ProfessionalTaxMode>('state')
   const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
   const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
-  const monthlySalarySuggestions = [
-    { label: '₹50K/mo', value: '50000' },
-    { label: '₹75K/mo', value: '75000' },
-    { label: '₹1L/mo', value: '100000' },
-    { label: '₹1.5L/mo', value: '150000' },
+  const monthlyIncrementOptions = [
+    { label: '+10K', value: '10000' },
+    { label: '+25K', value: '25000' },
+    { label: '+1L', value: '100000' },
   ]
 
   const targetInHand = targetValue
-  const applyMonthlySuggestion = (value: string) => {
-    const numericValue = Number(value)
-    setTargetValue(numericValue)
-    setTargetInput(formatNumber(numericValue))
+  const applyMonthlyIncrement = (incrementValue: string) => {
+    const increment = Number(incrementValue)
+    const nextValue = Math.max(0, targetValue + increment)
+    setTargetValue(nextValue)
+    setTargetInput(formatNumber(nextValue))
   }
 
   const result = useMemo(() => {
@@ -128,10 +128,9 @@ export function ReverseCalculator() {
             placeholder="e.g. 1,00,000"
           />
           <SuggestionChips
-            label="Suggested salaries"
-            options={monthlySalarySuggestions}
-            activeValue={targetValue > 0 ? String(targetValue) : undefined}
-            onPick={applyMonthlySuggestion}
+            label="Quick add"
+            options={monthlyIncrementOptions}
+            onPick={applyMonthlyIncrement}
           />
 
           <button
