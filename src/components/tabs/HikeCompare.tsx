@@ -11,11 +11,15 @@ import { calculateSalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
 import { ProfessionalTaxMode } from '../../utils/professionalTax'
 import { formatLakhValue, lakhInputToRupees, sanitizeLakhInput } from '../../utils/ctcInput'
 
+type HikeMode = '5' | '10' | '20' | '30' | 'custom'
+
 export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null; sharedCtc?: number }) {
   const initialCtc = sharedCtc || savedCtc || 0
   const [currentCtc, setCurrentCtc] = useState<number>(initialCtc)
   const [currentCtcLakhInput, setCurrentCtcLakhInput] = useState<string>(initialCtc > 0 ? formatLakhValue(initialCtc) : '')
   const [hikePercent, setHikePercent] = useState<number>(30)
+  const [hikeMode, setHikeMode] = useState<HikeMode>('30')
+  const [customHikeInput, setCustomHikeInput] = useState<string>('30')
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
@@ -51,10 +55,79 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   const currentInHand = calcInHand(currentCtc)
   const newInHand = calcInHand(newCtc)
   const diff = newInHand - currentInHand
+  const presetHikes = [5, 10, 20, 30]
+
+  const selectPresetHike = (value: number) => {
+    setHikeMode(String(value) as HikeMode)
+    setHikePercent(value)
+  }
+
+  const selectCustomHike = () => {
+    setHikeMode('custom')
+    const parsed = Number(customHikeInput)
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      setHikePercent(parsed)
+    }
+  }
+
+  const onCustomHikeChange = (raw: string) => {
+    const cleaned = raw.replace(/[^0-9.]/g, '')
+    const merged = cleaned.split('.').slice(0, 2).join('.')
+    const limited = merged.replace(/^(\d*\.?\d{0,2}).*$/, '$1')
+    setCustomHikeInput(limited)
+    const parsed = Number(limited)
+    if (limited === '') {
+      setHikePercent(0)
+      return
+    }
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      setHikePercent(parsed)
+    }
+  }
 
   return (
     <div className="space-y-6 pb-24 pt-4">
       <h2 className="text-2xl font-bold">Hike Calculator</h2>
+
+      {currentCtc > 0 && (
+        <div className="bg-black text-white rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center gap-2 text-accent-green mb-5">
+            <TrendingUp className="h-5 w-5" />
+            <span className="font-bold text-xs uppercase tracking-[0.12em]">Projected Growth</span>
+          </div>
+
+          <div className="mb-5 pb-5 border-b border-gray-800">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-2">Annual Hike</p>
+            <div className="flex items-baseline gap-3">
+              <p className="text-2xl font-bold text-accent-green">+{formatIndianCurrency(newCtc - currentCtc)}</p>
+              <p className="text-lg font-semibold text-gray-400">({hikePercent}%)</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">Current</p>
+              <p className="text-xl font-bold text-gray-400">
+                {formatIndianCurrency(currentInHand)}
+                <span className="text-sm font-normal text-gray-600 ml-0.5">/mo</span>
+              </p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-gray-600 flex-shrink-0" />
+            <div className="flex-1 text-right">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">After Hike</p>
+              <p className="text-xl font-bold text-white">
+                {formatIndianCurrency(newInHand)}
+                <span className="text-sm font-normal text-gray-400 ml-0.5">/mo</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-800 flex justify-between items-center">
+            <span className="text-sm text-gray-500">Monthly Increase</span>
+            <span className="text-xl font-bold text-accent-green">+{formatIndianCurrency(diff)}</span>
+          </div>
+        </div>
+      )}
 
       <Card className="border-2 border-border-default">
         <div className="space-y-5">
@@ -84,15 +157,54 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
             inputClassName="text-xl font-bold py-4"
           />
 
-          <Input
-            label="Expected Hike %"
-            suffix="%"
-            type="number"
-            value={hikePercent}
-            onChange={(e) => setHikePercent(Number(e.target.value))}
-            suffixClassName="text-primary font-black text-lg"
-            inputClassName="text-xl font-bold py-4"
-          />
+          <div>
+            <p className="block text-xs font-medium text-secondary mb-1.5 uppercase tracking-wide">Expected Hike %</p>
+            <div className="grid grid-cols-5 gap-2">
+              {presetHikes.map((value) => {
+                const key = String(value) as HikeMode
+                const active = hikeMode === key
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => selectPresetHike(value)}
+                    className={`h-10 rounded-xl text-sm font-semibold border transition-colors ${
+                      active
+                        ? 'bg-black text-white border-black'
+                        : 'bg-bg-secondary text-primary border-border-default'
+                    }`}
+                  >
+                    {value}%
+                  </button>
+                )
+              })}
+              <button
+                type="button"
+                onClick={selectCustomHike}
+                className={`h-10 rounded-xl text-sm font-semibold border transition-colors ${
+                  hikeMode === 'custom'
+                    ? 'bg-black text-white border-black'
+                    : 'bg-bg-secondary text-primary border-border-default'
+                }`}
+              >
+                Custom
+              </button>
+            </div>
+          </div>
+
+          {hikeMode === 'custom' && (
+            <Input
+              label="Custom Hike %"
+              suffix="%"
+              type="text"
+              inputMode="decimal"
+              value={customHikeInput}
+              onChange={(e) => onCustomHikeChange(e.target.value)}
+              suffixClassName="text-primary font-black text-lg"
+              inputClassName="text-xl font-bold py-4"
+              placeholder="e.g. 12.5"
+            />
+          )}
 
           <button
             onClick={() => setShowAdvanced((v) => !v)}
@@ -196,44 +308,6 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
         </div>
       ) : (
         <>
-          <div className="bg-black text-white rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center gap-2 text-accent-green mb-5">
-              <TrendingUp className="h-5 w-5" />
-              <span className="font-bold text-xs uppercase tracking-[0.12em]">Projected Growth</span>
-            </div>
-
-            <div className="mb-5 pb-5 border-b border-gray-800">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-2">Annual Hike</p>
-              <div className="flex items-baseline gap-3">
-                <p className="text-2xl font-bold text-accent-green">+{formatIndianCurrency(newCtc - currentCtc)}</p>
-                <p className="text-lg font-semibold text-gray-400">({hikePercent}%)</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">Current</p>
-                <p className="text-xl font-bold text-gray-400">
-                  {formatIndianCurrency(currentInHand)}
-                  <span className="text-sm font-normal text-gray-600 ml-0.5">/mo</span>
-                </p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-600 flex-shrink-0" />
-              <div className="flex-1 text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">After Hike</p>
-                <p className="text-xl font-bold text-white">
-                  {formatIndianCurrency(newInHand)}
-                  <span className="text-sm font-normal text-gray-400 ml-0.5">/mo</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-gray-800 flex justify-between items-center">
-              <span className="text-sm text-gray-500">Monthly Increase</span>
-              <span className="text-xl font-bold text-accent-green">+{formatIndianCurrency(diff)}</span>
-            </div>
-          </div>
-
           <div className="bg-bg-secondary p-4 rounded-xl">
             <p className="text-xs text-secondary text-center">
               *Estimates based on {taxRegime === 'new' ? 'New' : 'Old'} Tax Regime FY 2025-26. Actual in-hand may vary.
