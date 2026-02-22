@@ -36,6 +36,9 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const [receivesHRA, setReceivesHRA] = useState<boolean>(false)
   const [hraReceived, setHraReceived] = useState<number>(0)
   const [rentPaid, setRentPaid] = useState<number>(0)
+  const [homeLoanInterest, setHomeLoanInterest] = useState<number>(0)
+  const [educationLoanInterest, setEducationLoanInterest] = useState<number>(0)
+  const [savingsInterest, setSavingsInterest] = useState<number>(0)
   const [isMetro, setIsMetro] = useState<boolean>(true)
   const [nps, setNps] = useState<number>(0)
   const [employerNps, setEmployerNps] = useState<number>(0)
@@ -47,6 +50,9 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const [section80DInput, setSection80DInput] = useState<string>('')
   const [hraReceivedInput, setHraReceivedInput] = useState<string>('')
   const [rentPaidInput, setRentPaidInput] = useState<string>('')
+  const [homeLoanInterestInput, setHomeLoanInterestInput] = useState<string>('')
+  const [educationLoanInterestInput, setEducationLoanInterestInput] = useState<string>('')
+  const [savingsInterestInput, setSavingsInterestInput] = useState<string>('')
   const [npsInput, setNpsInput] = useState<string>('')
   const [employerNpsInput, setEmployerNpsInput] = useState<string>('')
 
@@ -57,6 +63,7 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const income = ctc - employerPF
 
   const ded80DMax = ageGroup === 'below60' ? 25000 : 50000
+  const savingsDeductionMax = ageGroup === 'below60' ? 10000 : 50000
 
   useEffect(() => {
     if (sharedCtc && sharedCtc > 0) {
@@ -97,7 +104,19 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
     const ded80C = Math.min(section80C, 150000)
     const ded80D = Math.min(section80D, ded80DMax)
     const dedNPS = Math.min(nps, 50000)
-    const totalExemptions = hraExemption + annualPT + ded80C + ded80D + dedNPS + dedEmployerNpsOld
+    const dedHomeLoanInterest = Math.min(homeLoanInterest, 200000)
+    const dedEducationLoanInterest = Math.max(educationLoanInterest, 0)
+    const dedSavingsInterest = Math.min(Math.max(savingsInterest, 0), savingsDeductionMax)
+    const totalExemptions =
+      hraExemption +
+      annualPT +
+      ded80C +
+      ded80D +
+      dedNPS +
+      dedEmployerNpsOld +
+      dedHomeLoanInterest +
+      dedEducationLoanInterest +
+      dedSavingsInterest
     const oldRegimeTaxable = Math.max(0, income - totalExemptions)
 
     const oldSlabs =
@@ -121,6 +140,9 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
     section80D,
     hraReceived,
     rentPaid,
+    homeLoanInterest,
+    educationLoanInterest,
+    savingsInterest,
     basicSalary,
     isMetro,
     nps,
@@ -129,6 +151,7 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
     receivesHRA,
     selectedState,
     ded80DMax,
+    savingsDeductionMax,
   ])
 
   if (!comparison) return null
@@ -243,13 +266,16 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
                 onClick={() => setShowDeductions(!showDeductions)}
                 className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1 hover:text-text-primary transition-colors"
               >
-                <span>Customize Deductions {!showDeductions && '(Optional)'}</span>
+                <span>Advanced Deductions {!showDeductions && '(Old Regime Boosters)'}</span>
                 <span className="text-base leading-none">{showDeductions ? '−' : '+'}</span>
               </button>
 
-              {!showDeductions && (section80C > 0 || section80D > 0 || nps > 0 || receivesHRA) && (
+              {!showDeductions && (section80C > 0 || section80D > 0 || nps > 0 || receivesHRA || homeLoanInterest > 0 || educationLoanInterest > 0 || savingsInterest > 0) && (
                 <p className="text-xs text-secondary mt-2">
                   Current deductions: 80C: {formatIndianCurrency(section80C)}, 80D: {formatIndianCurrency(section80D)}, NPS: {formatIndianCurrency(nps)}
+                  {homeLoanInterest > 0 && `, Home loan interest: ${formatIndianCurrency(homeLoanInterest)}`}
+                  {educationLoanInterest > 0 && `, Education loan interest: ${formatIndianCurrency(educationLoanInterest)}`}
+                  {savingsInterest > 0 && `, Savings interest: ${formatIndianCurrency(savingsInterest)}`}
                   {receivesHRA && ', HRA exemption applied'}
                 </p>
               )}
@@ -353,6 +379,59 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
                     const n = Number(e.target.value.replace(/,/g, ''))
                     setSection80DInput(n > 0 ? formatNumber(n) : '')
                   }}
+                />
+                <Input
+                  label="Home Loan Interest (Section 24b, self-occupied)"
+                  prefix="₹"
+                  type="text"
+                  inputMode="numeric"
+                  value={homeLoanInterestInput}
+                  onChange={(e) => {
+                    const stripped = e.target.value.replace(/[^0-9]/g, '')
+                    setHomeLoanInterestInput(stripped)
+                    setHomeLoanInterest(Number(stripped))
+                  }}
+                  onFocus={(e) => setHomeLoanInterestInput(e.target.value.replace(/,/g, ''))}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value.replace(/,/g, ''))
+                    setHomeLoanInterestInput(n > 0 ? formatNumber(n) : '')
+                  }}
+                  suffix="/ 2L"
+                />
+                <Input
+                  label="Education Loan Interest (Section 80E)"
+                  prefix="₹"
+                  type="text"
+                  inputMode="numeric"
+                  value={educationLoanInterestInput}
+                  onChange={(e) => {
+                    const stripped = e.target.value.replace(/[^0-9]/g, '')
+                    setEducationLoanInterestInput(stripped)
+                    setEducationLoanInterest(Number(stripped))
+                  }}
+                  onFocus={(e) => setEducationLoanInterestInput(e.target.value.replace(/,/g, ''))}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value.replace(/,/g, ''))
+                    setEducationLoanInterestInput(n > 0 ? formatNumber(n) : '')
+                  }}
+                />
+                <Input
+                  label={`Savings Interest Deduction (${ageGroup === 'below60' ? '80TTA' : '80TTB'})`}
+                  prefix="₹"
+                  type="text"
+                  inputMode="numeric"
+                  value={savingsInterestInput}
+                  onChange={(e) => {
+                    const stripped = e.target.value.replace(/[^0-9]/g, '')
+                    setSavingsInterestInput(stripped)
+                    setSavingsInterest(Number(stripped))
+                  }}
+                  onFocus={(e) => setSavingsInterestInput(e.target.value.replace(/,/g, ''))}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value.replace(/,/g, ''))
+                    setSavingsInterestInput(n > 0 ? formatNumber(n) : '')
+                  }}
+                  suffix={`/ ${(savingsDeductionMax / 1000).toFixed(0)}k`}
                 />
                 <div>
                   <Input
