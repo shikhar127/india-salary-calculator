@@ -29,7 +29,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
   const [ctc, setCtc] = useState<number>(initialCtc)
   const [ctcLakhInput, setCtcLakhInput] = useState<string>(initialCtc > 0 ? formatLakhValue(initialCtc) : '')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
-  const [showDeductions, setShowDeductions] = useState<boolean>(false)
 
   const [section80C, setSection80C] = useState<number>(0)
   const [section80D, setSection80D] = useState<number>(0)
@@ -254,230 +253,206 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
           <p className="text-xs text-secondary mt-1">Professional Tax is auto-estimated from selected state and deductible in Old Regime (Section 16(iii)).</p>
         </Card>
 
-        {ctc === 0 ? (
+        <Card className="space-y-4">
+          <h3 className="text-lg font-bold">Old Regime Deductions (Optional)</h3>
+
+          <div className="bg-bg-secondary p-3 rounded-lg">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs font-semibold text-secondary">HRA Exemption</p>
+              <Toggle
+                value={receivesHRA}
+                onChange={setReceivesHRA}
+                leftLabel="Own home"
+                rightLabel="Renting"
+              />
+            </div>
+            {receivesHRA && (
+              <div className="space-y-3">
+                <div>
+                  <Input
+                    label="HRA Received"
+                    prefix="₹"
+                    type="text"
+                    inputMode="numeric"
+                    value={hraReceivedInput}
+                    onChange={(e) => {
+                      const stripped = e.target.value.replace(/[^0-9]/g, '')
+                      setHraReceivedInput(stripped)
+                      setHraReceived(Number(stripped))
+                    }}
+                    onFocus={(e) => setHraReceivedInput(e.target.value.replace(/,/g, ''))}
+                    onBlur={(e) => {
+                      const n = Number(e.target.value.replace(/,/g, ''))
+                      setHraReceivedInput(n > 0 ? formatNumber(n) : '')
+                    }}
+                  />
+                  <p className="text-xs text-secondary mt-1">Annual HRA component from your salary</p>
+                </div>
+                <Input
+                  label="Rent Paid"
+                  prefix="₹"
+                  type="text"
+                  inputMode="numeric"
+                  value={rentPaidInput}
+                  onChange={(e) => {
+                    const stripped = e.target.value.replace(/[^0-9]/g, '')
+                    setRentPaidInput(stripped)
+                    setRentPaid(Number(stripped))
+                  }}
+                  onFocus={(e) => setRentPaidInput(e.target.value.replace(/,/g, ''))}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value.replace(/,/g, ''))
+                    setRentPaidInput(n > 0 ? formatNumber(n) : '')
+                  }}
+                />
+                <Toggle
+                  value={isMetro}
+                  onChange={setIsMetro}
+                  leftLabel="Non-Metro"
+                  rightLabel="Metro"
+                />
+                <p className="text-xs text-secondary">Basic salary assumed as 50% of CTC: {formatIndianCurrency(basicSalary)}</p>
+              </div>
+            )}
+          </div>
+
+          <Input
+            label="Section 80C (EPF, LIC, ELSS)"
+            prefix="₹"
+            type="text"
+            inputMode="numeric"
+            value={section80CInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setSection80CInput(stripped)
+              setSection80C(Number(stripped))
+            }}
+            onFocus={(e) => setSection80CInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setSection80CInput(n > 0 ? formatNumber(n) : '')
+            }}
+            suffix="/ 1.5L"
+          />
+          <Input
+            label={`Section 80D (Health Ins) — max ₹${(ded80DMax / 1000).toFixed(0)}k`}
+            prefix="₹"
+            type="text"
+            inputMode="numeric"
+            value={section80DInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setSection80DInput(stripped)
+              setSection80D(Number(stripped))
+            }}
+            onFocus={(e) => setSection80DInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setSection80DInput(n > 0 ? formatNumber(n) : '')
+            }}
+          />
+          <Input
+            label="Home Loan Interest (Section 24b, self-occupied)"
+            prefix="₹"
+            type="text"
+            inputMode="numeric"
+            value={homeLoanInterestInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setHomeLoanInterestInput(stripped)
+              setHomeLoanInterest(Number(stripped))
+            }}
+            onFocus={(e) => setHomeLoanInterestInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setHomeLoanInterestInput(n > 0 ? formatNumber(n) : '')
+            }}
+            suffix="/ 2L"
+          />
+          <Input
+            label="Education Loan Interest (Section 80E)"
+            prefix="₹"
+            type="text"
+            inputMode="numeric"
+            value={educationLoanInterestInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setEducationLoanInterestInput(stripped)
+              setEducationLoanInterest(Number(stripped))
+            }}
+            onFocus={(e) => setEducationLoanInterestInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setEducationLoanInterestInput(n > 0 ? formatNumber(n) : '')
+            }}
+          />
+          <Input
+            label={`Savings Interest Deduction (${ageGroup === 'below60' ? '80TTA' : '80TTB'})`}
+            prefix="₹"
+            type="text"
+            inputMode="numeric"
+            value={savingsInterestInput}
+            onChange={(e) => {
+              const stripped = e.target.value.replace(/[^0-9]/g, '')
+              setSavingsInterestInput(stripped)
+              setSavingsInterest(Number(stripped))
+            }}
+            onFocus={(e) => setSavingsInterestInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setSavingsInterestInput(n > 0 ? formatNumber(n) : '')
+            }}
+            suffix={`/ ${(savingsDeductionMax / 1000).toFixed(0)}k`}
+          />
+          <div>
+            <Input
+              label="NPS — Voluntary Contribution (80CCD 1B)"
+              prefix="₹"
+              type="text"
+              inputMode="numeric"
+              value={npsInput}
+              onChange={(e) => {
+                const stripped = e.target.value.replace(/[^0-9]/g, '')
+                setNpsInput(stripped)
+                setNps(Number(stripped))
+              }}
+              onFocus={(e) => setNpsInput(e.target.value.replace(/,/g, ''))}
+              onBlur={(e) => {
+                const n = Number(e.target.value.replace(/,/g, ''))
+                setNpsInput(n > 0 ? formatNumber(n) : '')
+              }}
+              suffix="/ 50k"
+            />
+            <p className="text-xs text-secondary mt-1">Your personal top-up contribution to NPS, separate from employer's.</p>
+          </div>
+          <div>
+            <Input
+              label="Employer NPS — also deductible in New Regime (80CCD 2)"
+              prefix="₹"
+              type="text"
+              inputMode="numeric"
+              value={employerNpsInput}
+              onChange={(e) => {
+                const stripped = e.target.value.replace(/[^0-9]/g, '')
+                setEmployerNpsInput(stripped)
+                setEmployerNps(Number(stripped))
+              }}
+              onFocus={(e) => setEmployerNpsInput(e.target.value.replace(/,/g, ''))}
+              onBlur={(e) => {
+                const n = Number(e.target.value.replace(/,/g, ''))
+                setEmployerNpsInput(n > 0 ? formatNumber(n) : '')
+              }}
+              suffix={`/ ${((basicSalary * 0.14) / 1000).toFixed(0)}k`}
+            />
+            <p className="text-xs text-secondary mt-1">New Regime cap: 14% of Basic · Old Regime cap: 10% of Basic</p>
+          </div>
+        </Card>
+
+        {ctc === 0 && (
           <div className="text-center py-16 px-6">
             <h3 className="text-2xl font-bold mb-3">Compare Tax Regimes</h3>
             <p className="text-secondary text-sm mb-8 max-w-sm mx-auto">Enter your Annual CTC in lakhs to see which tax regime saves you more</p>
           </div>
-        ) : (
-          <>
-            <div className="mb-4">
-              <button
-                onClick={() => setShowDeductions(!showDeductions)}
-                className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1 hover:text-text-primary transition-colors"
-              >
-                <span>Advanced Deductions {!showDeductions && '(Old Regime Boosters)'}</span>
-                <span className="text-base leading-none">{showDeductions ? '−' : '+'}</span>
-              </button>
-
-              {!showDeductions && (section80C > 0 || section80D > 0 || nps > 0 || receivesHRA || homeLoanInterest > 0 || educationLoanInterest > 0 || savingsInterest > 0) && (
-                <p className="text-xs text-secondary mt-2">
-                  Current deductions: 80C: {formatIndianCurrency(section80C)}, 80D: {formatIndianCurrency(section80D)}, NPS: {formatIndianCurrency(nps)}
-                  {homeLoanInterest > 0 && `, Home loan interest: ${formatIndianCurrency(homeLoanInterest)}`}
-                  {educationLoanInterest > 0 && `, Education loan interest: ${formatIndianCurrency(educationLoanInterest)}`}
-                  {savingsInterest > 0 && `, Savings interest: ${formatIndianCurrency(savingsInterest)}`}
-                  {receivesHRA && ', HRA exemption applied'}
-                </p>
-              )}
-            </div>
-
-            {showDeductions && (
-              <Card className="space-y-4">
-                <h3 className="text-lg font-bold">Deductions (Old Regime)</h3>
-
-                <div className="bg-bg-secondary p-3 rounded-lg">
-                  <div className="flex justify-between items-center mb-3">
-                    <p className="text-xs font-semibold text-secondary">HRA Exemption</p>
-                    <Toggle
-                      value={receivesHRA}
-                      onChange={setReceivesHRA}
-                      leftLabel="Own home"
-                      rightLabel="Renting"
-                    />
-                  </div>
-                  {receivesHRA && (
-                    <div className="space-y-3">
-                      <div>
-                        <Input
-                          label="HRA Received"
-                          prefix="₹"
-                          type="text"
-                          inputMode="numeric"
-                          value={hraReceivedInput}
-                          onChange={(e) => {
-                            const stripped = e.target.value.replace(/[^0-9]/g, '')
-                            setHraReceivedInput(stripped)
-                            setHraReceived(Number(stripped))
-                          }}
-                          onFocus={(e) => setHraReceivedInput(e.target.value.replace(/,/g, ''))}
-                          onBlur={(e) => {
-                            const n = Number(e.target.value.replace(/,/g, ''))
-                            setHraReceivedInput(n > 0 ? formatNumber(n) : '')
-                          }}
-                        />
-                        <p className="text-xs text-secondary mt-1">Annual HRA component from your salary</p>
-                      </div>
-                      <Input
-                        label="Rent Paid"
-                        prefix="₹"
-                        type="text"
-                        inputMode="numeric"
-                        value={rentPaidInput}
-                        onChange={(e) => {
-                          const stripped = e.target.value.replace(/[^0-9]/g, '')
-                          setRentPaidInput(stripped)
-                          setRentPaid(Number(stripped))
-                        }}
-                        onFocus={(e) => setRentPaidInput(e.target.value.replace(/,/g, ''))}
-                        onBlur={(e) => {
-                          const n = Number(e.target.value.replace(/,/g, ''))
-                          setRentPaidInput(n > 0 ? formatNumber(n) : '')
-                        }}
-                      />
-                      <Toggle
-                        value={isMetro}
-                        onChange={setIsMetro}
-                        leftLabel="Non-Metro"
-                        rightLabel="Metro"
-                      />
-                      <p className="text-xs text-secondary">Basic salary assumed as 50% of CTC: {formatIndianCurrency(basicSalary)}</p>
-                    </div>
-                  )}
-                </div>
-
-                <Input
-                  label="Section 80C (EPF, LIC, ELSS)"
-                  prefix="₹"
-                  type="text"
-                  inputMode="numeric"
-                  value={section80CInput}
-                  onChange={(e) => {
-                    const stripped = e.target.value.replace(/[^0-9]/g, '')
-                    setSection80CInput(stripped)
-                    setSection80C(Number(stripped))
-                  }}
-                  onFocus={(e) => setSection80CInput(e.target.value.replace(/,/g, ''))}
-                  onBlur={(e) => {
-                    const n = Number(e.target.value.replace(/,/g, ''))
-                    setSection80CInput(n > 0 ? formatNumber(n) : '')
-                  }}
-                  suffix="/ 1.5L"
-                />
-                <Input
-                  label={`Section 80D (Health Ins) — max ₹${(ded80DMax / 1000).toFixed(0)}k`}
-                  prefix="₹"
-                  type="text"
-                  inputMode="numeric"
-                  value={section80DInput}
-                  onChange={(e) => {
-                    const stripped = e.target.value.replace(/[^0-9]/g, '')
-                    setSection80DInput(stripped)
-                    setSection80D(Number(stripped))
-                  }}
-                  onFocus={(e) => setSection80DInput(e.target.value.replace(/,/g, ''))}
-                  onBlur={(e) => {
-                    const n = Number(e.target.value.replace(/,/g, ''))
-                    setSection80DInput(n > 0 ? formatNumber(n) : '')
-                  }}
-                />
-                <Input
-                  label="Home Loan Interest (Section 24b, self-occupied)"
-                  prefix="₹"
-                  type="text"
-                  inputMode="numeric"
-                  value={homeLoanInterestInput}
-                  onChange={(e) => {
-                    const stripped = e.target.value.replace(/[^0-9]/g, '')
-                    setHomeLoanInterestInput(stripped)
-                    setHomeLoanInterest(Number(stripped))
-                  }}
-                  onFocus={(e) => setHomeLoanInterestInput(e.target.value.replace(/,/g, ''))}
-                  onBlur={(e) => {
-                    const n = Number(e.target.value.replace(/,/g, ''))
-                    setHomeLoanInterestInput(n > 0 ? formatNumber(n) : '')
-                  }}
-                  suffix="/ 2L"
-                />
-                <Input
-                  label="Education Loan Interest (Section 80E)"
-                  prefix="₹"
-                  type="text"
-                  inputMode="numeric"
-                  value={educationLoanInterestInput}
-                  onChange={(e) => {
-                    const stripped = e.target.value.replace(/[^0-9]/g, '')
-                    setEducationLoanInterestInput(stripped)
-                    setEducationLoanInterest(Number(stripped))
-                  }}
-                  onFocus={(e) => setEducationLoanInterestInput(e.target.value.replace(/,/g, ''))}
-                  onBlur={(e) => {
-                    const n = Number(e.target.value.replace(/,/g, ''))
-                    setEducationLoanInterestInput(n > 0 ? formatNumber(n) : '')
-                  }}
-                />
-                <Input
-                  label={`Savings Interest Deduction (${ageGroup === 'below60' ? '80TTA' : '80TTB'})`}
-                  prefix="₹"
-                  type="text"
-                  inputMode="numeric"
-                  value={savingsInterestInput}
-                  onChange={(e) => {
-                    const stripped = e.target.value.replace(/[^0-9]/g, '')
-                    setSavingsInterestInput(stripped)
-                    setSavingsInterest(Number(stripped))
-                  }}
-                  onFocus={(e) => setSavingsInterestInput(e.target.value.replace(/,/g, ''))}
-                  onBlur={(e) => {
-                    const n = Number(e.target.value.replace(/,/g, ''))
-                    setSavingsInterestInput(n > 0 ? formatNumber(n) : '')
-                  }}
-                  suffix={`/ ${(savingsDeductionMax / 1000).toFixed(0)}k`}
-                />
-                <div>
-                  <Input
-                    label="NPS — Voluntary Contribution (80CCD 1B)"
-                    prefix="₹"
-                    type="text"
-                    inputMode="numeric"
-                    value={npsInput}
-                    onChange={(e) => {
-                      const stripped = e.target.value.replace(/[^0-9]/g, '')
-                      setNpsInput(stripped)
-                      setNps(Number(stripped))
-                    }}
-                    onFocus={(e) => setNpsInput(e.target.value.replace(/,/g, ''))}
-                    onBlur={(e) => {
-                      const n = Number(e.target.value.replace(/,/g, ''))
-                      setNpsInput(n > 0 ? formatNumber(n) : '')
-                    }}
-                    suffix="/ 50k"
-                  />
-                  <p className="text-xs text-secondary mt-1">Your personal top-up contribution to NPS, separate from employer's.</p>
-                </div>
-                <div>
-                  <Input
-                    label="Employer NPS — also deductible in New Regime (80CCD 2)"
-                    prefix="₹"
-                    type="text"
-                    inputMode="numeric"
-                    value={employerNpsInput}
-                    onChange={(e) => {
-                      const stripped = e.target.value.replace(/[^0-9]/g, '')
-                      setEmployerNpsInput(stripped)
-                      setEmployerNps(Number(stripped))
-                    }}
-                    onFocus={(e) => setEmployerNpsInput(e.target.value.replace(/,/g, ''))}
-                    onBlur={(e) => {
-                      const n = Number(e.target.value.replace(/,/g, ''))
-                      setEmployerNpsInput(n > 0 ? formatNumber(n) : '')
-                    }}
-                    suffix={`/ ${((basicSalary * 0.14) / 1000).toFixed(0)}k`}
-                  />
-                  <p className="text-xs text-secondary mt-1">New Regime cap: 14% of Basic · Old Regime cap: 10% of Basic</p>
-                </div>
-              </Card>
-            )}
-          </>
         )}
       </div>
     </div>
