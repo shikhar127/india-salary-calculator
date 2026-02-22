@@ -5,9 +5,21 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string
   suffix?: string
   prefix?: string
+  suffixClassName?: string
+  prefixClassName?: string
 }
 
-export function Input({ label, error, suffix, prefix, className = '', id, ...props }: InputProps) {
+export function Input({
+  label,
+  error,
+  suffix,
+  prefix,
+  suffixClassName = '',
+  prefixClassName = '',
+  className = '',
+  id,
+  ...props
+}: InputProps) {
   const generatedId = useId()
   const inputId = id || generatedId
   return (
@@ -20,7 +32,7 @@ export function Input({ label, error, suffix, prefix, className = '', id, ...pro
       <div className="relative">
         {prefix && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span className="text-secondary text-sm">{prefix}</span>
+            <span className={`text-secondary text-sm ${prefixClassName}`}>{prefix}</span>
           </div>
         )}
         <input
@@ -30,7 +42,7 @@ export function Input({ label, error, suffix, prefix, className = '', id, ...pro
             text-primary font-medium shadow-sm focus:border-primary focus:ring-1 focus:ring-primary
             disabled:bg-gray-100 disabled:text-gray-400
             ${prefix ? 'pl-7' : 'pl-4'}
-            ${suffix ? 'pr-12' : 'pr-4'}
+            ${suffix ? (suffixClassName ? 'pr-24' : 'pr-12') : 'pr-4'}
             py-3 text-sm outline-none
             ${error ? 'border border-accent-danger' : ''}
           `}
@@ -38,7 +50,7 @@ export function Input({ label, error, suffix, prefix, className = '', id, ...pro
         />
         {suffix && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <span className="text-secondary text-sm">{suffix}</span>
+            <span className={`text-secondary text-sm ${suffixClassName}`}>{suffix}</span>
           </div>
         )}
       </div>

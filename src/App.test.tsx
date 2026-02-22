@@ -36,7 +36,7 @@ describe('App cross-tab CTC sync', () => {
 
     const salaryInput = screen.getByLabelText(/Annual CTC/i) as HTMLInputElement
     await act(async () => {
-      fireEvent.change(salaryInput, { target: { value: '1200000' } })
+      fireEvent.change(salaryInput, { target: { value: '12' } })
       await new Promise((resolve) => setTimeout(resolve, 350))
     })
 
@@ -59,7 +59,7 @@ describe('App cross-tab CTC sync', () => {
 
     const salaryInputAfterTaxEdit = screen.getByLabelText(/Annual CTC/i) as HTMLInputElement
     await waitFor(() => {
-      expect(salaryInputAfterTaxEdit.value.replace(/,/g, '')).toBe('1800000')
+      expect(salaryInputAfterTaxEdit.value).toBe('18')
     })
   })
 })

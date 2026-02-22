@@ -99,6 +99,8 @@ export function ReverseCalculator() {
             prefix="₹"
             type="text"
             inputMode="numeric"
+            suffix="/mo"
+            suffixClassName="text-primary font-extrabold tracking-wide text-base"
             value={targetInput}
             onChange={(e) => {
               const stripped = e.target.value.replace(/[^0-9]/g, '')
@@ -124,7 +126,7 @@ export function ReverseCalculator() {
 
           {!showAdvanced && (
             <p className="text-xs text-secondary -mt-1">
-              {taxRegime === 'new' ? 'New' : 'Old'} regime · {isMetro ? 'Metro' : 'Non-Metro'} · State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
+              {taxRegime === 'new' ? 'New' : 'Old'} regime · {isMetro ? 'Metro' : 'Non-Metro'} · State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800 /mo' : '12% of basic'}
             </p>
           )}
 

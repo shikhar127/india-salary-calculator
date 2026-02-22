@@ -14,9 +14,25 @@ import { ProfessionalTaxMode } from '../../utils/professionalTax'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
 
+const formatLakhValue = (ctc: number): string => {
+  if (!ctc || ctc <= 0) return ''
+  const inLakhs = ctc / 100000
+  return inLakhs % 1 === 0 ? String(inLakhs) : inLakhs.toFixed(2).replace(/\.?0+$/, '')
+}
+
+const sanitizeLakhInput = (raw: string): string => {
+  const cleaned = raw.replace(/[^0-9.]/g, '')
+  const parts = cleaned.split('.')
+  const merged = parts.length > 1 ? `${parts[0]}.${parts.slice(1).join('')}` : parts[0]
+  const limited = merged.replace(/^(\d*\.?\d{0,2}).*$/, '$1')
+  if (limited === '') return ''
+  if (limited.startsWith('0.') || limited === '0') return limited
+  return limited.replace(/^0+/, '') || ''
+}
+
 export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number | null; onCtcChange?: (ctc: number) => void }) {
   const initialCtc = savedCtc && savedCtc > 0 ? savedCtc : 0
-  const [ctcInput, setCtcInput] = useState<string>(initialCtc > 0 ? formatNumber(initialCtc) : '')
+  const [ctcLakhInput, setCtcLakhInput] = useState<string>(initialCtc > 0 ? formatLakhValue(initialCtc) : '')
   const [ctc, setCtc] = useState<number>(initialCtc)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [variablePay, setVariablePay] = useState<number>(0)
@@ -34,17 +50,17 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const val = Number(ctcInput.replace(/,/g, ''))
-      if (val > 0) setCtc(val)
+      const valInLakhs = Number(ctcLakhInput)
+      if (valInLakhs > 0) setCtc(Math.round(valInLakhs * 100000))
       else setCtc(0)
     }, 300)
     return () => clearTimeout(timer)
-  }, [ctcInput])
+  }, [ctcLakhInput])
 
   useEffect(() => {
     if (savedCtc && savedCtc > 0) {
       setCtc(savedCtc)
-      setCtcInput(formatNumber(savedCtc))
+      setCtcLakhInput(formatLakhValue(savedCtc))
     }
   }, [savedCtc])
 
@@ -144,22 +160,21 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
         <div className="space-y-4">
           <Input
             label="Annual CTC"
-            prefix="₹"
             type="text"
-            inputMode="numeric"
-            value={ctcInput}
-            onChange={(e) => {
-              const cleaned = e.target.value.replace(/[^0-9]/g, '')
-              const noLeadingZeros = cleaned.replace(/^0+/, '') || (cleaned.length > 0 ? '0' : '')
-              setCtcInput(noLeadingZeros)
-            }}
-            onFocus={(e) => setCtcInput(e.target.value.replace(/,/g, ''))}
+            inputMode="decimal"
+            value={ctcLakhInput}
+            onChange={(e) => setCtcLakhInput(sanitizeLakhInput(e.target.value))}
             onBlur={(e) => {
-              const n = Number(e.target.value.replace(/,/g, ''))
-              setCtcInput(n > 0 ? formatNumber(n) : '')
+              const n = Number(e.target.value)
+              setCtcLakhInput(n > 0 ? formatLakhValue(Math.round(n * 100000)) : '')
             }}
-            placeholder="e.g. 12,00,000"
+            placeholder="e.g. 12.5"
+            suffix="LAKH"
+            suffixClassName="text-primary font-extrabold tracking-wide text-base"
           />
+          <p className="text-xs text-secondary -mt-2">
+            Enter CTC in lakhs (e.g. 12.5 = {formatIndianCurrency(1250000)})
+          </p>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
