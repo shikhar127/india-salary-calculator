@@ -8,13 +8,13 @@ import { Button } from '../ui/Button'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount, RowAmount } from '../ui/DisplayAmount'
 import { STATES } from '../../utils/constants'
-import { formatIndianCurrency, formatShorthand } from '../../utils/formatting'
+import { formatIndianCurrency, formatShorthand, formatNumber } from '../../utils/formatting'
 import { calculateTax, calcPF } from '../../utils/taxLogic'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
 
 export function SalaryCalculator() {
-  const [ctcInput, setCtcInput] = useState<string>('1200000')
+  const [ctcInput, setCtcInput] = useState<string>(formatNumber(1200000))
   const [ctc, setCtc] = useState<number>(1200000)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [variablePay, setVariablePay] = useState<number>(0)
@@ -29,7 +29,7 @@ export function SalaryCalculator() {
   // Debounce ctcInput → ctc (300ms)
   useEffect(() => {
     const timer = setTimeout(() => {
-      const val = Number(ctcInput)
+      const val = Number(ctcInput.replace(/,/g, ''))
       if (val > 0) setCtc(val)
       else setCtc(0)
     }, 300)
@@ -172,10 +172,16 @@ export function SalaryCalculator() {
           <Input
             label="Annual CTC"
             prefix="₹"
-            type="number"
+            type="text"
+            inputMode="numeric"
             value={ctcInput}
-            onChange={(e) => setCtcInput(e.target.value)}
-            placeholder="e.g. 1200000"
+            onChange={(e) => setCtcInput(e.target.value.replace(/[^0-9]/g, ''))}
+            onFocus={(e) => setCtcInput(e.target.value.replace(/,/g, ''))}
+            onBlur={(e) => {
+              const n = Number(e.target.value.replace(/,/g, ''))
+              setCtcInput(n > 0 ? formatNumber(n) : '')
+            }}
+            placeholder="e.g. 12,00,000"
           />
           <div className="grid grid-cols-2 gap-4">
             <div>

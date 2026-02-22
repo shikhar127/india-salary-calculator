@@ -87,14 +87,16 @@ Passes full CTC to `calculateTax` instead of gross salary (CTC − employer PF �
 
 ## 🟡 Moderate Issues
 
-### 6. Kerala Professional Tax Wrong
-**File**: `constants.ts` (line 9)
+### 6. Kerala Professional Tax Wrong ✅ FIXED
+**File**: `constants.ts` (line 10)
 
-```ts
+~~```ts
 { name: 'Kerala', pt: 2400 },
-```
+```~~
 
-Kerala's maximum Professional Tax is **₹1,200/year** (₹100/month for salary > ₹12,000/month). The app shows ₹2,400 — **double the correct value**.
+Kerala's maximum Professional Tax is **₹1,200/year** (₹100/month for salary > ₹12,000/month). ~~The app shows ₹2,400 — **double the correct value**.~~
+
+**Fixed:** Now correctly shows ₹1,200.
 
 ---
 
