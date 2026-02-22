@@ -7,7 +7,7 @@
 - [x] Sprint 3: Progressive Reveal - Hike & Reverse Tabs
 - [x] Sprint 4: Tax Tab - Simplified Flow (Part 1)
 - [x] Sprint 5: Tax Tab - Progressive Deductions (Part 2)
-- [ ] Sprint 6: Polish, Testing & Deploy
+- [x] Sprint 6: Polish, Testing & Deploy
 
 ---
 
@@ -55,3 +55,33 @@
 - Summary line shows current deductions when collapsed
 - Maintained all existing calculation logic and features
 - Much simpler initial UX focused on CTC as primary input
+
+### ✅ Sprint 6: Polish, Testing & Deploy
+- Updated package.json version to 1.2.0
+- Built web app with GitHub Pages base path
+- Built production APK (3.2 MB) and AAB (3.0 MB) with Capacitor base
+- Signed both files with release keystore
+- Generated SHA256 checksums for verification
+- Copied v1.2 releases to ~/SalaryFit-Releases/
+- Deployed web app to GitHub Pages at shikhar127.github.io/india-salary-calculator/
+- All 4 v1.2 enhancements successfully implemented and shipped!
+
+---
+
+## v1.2 Summary
+
+**Enhancements Delivered:**
+1. ✅ Empty state handling for all 4 tabs with hero CTAs
+2. ✅ Minimal input principle with smart defaults verified
+3. ✅ Progressive reveal with "Advanced Options" for Hike and Reverse tabs
+4. ✅ Tax tab simplified CTC-first flow with optional deduction customization
+
+**Release Files:**
+- APK: india-salary-calculator-v1.2.apk (3.2 MB)
+- AAB: india-salary-calculator-v1.2.aab (3.0 MB)
+- Location: ~/SalaryFit-Releases/
+
+**Deployment:**
+- Web: https://shikhar127.github.io/india-salary-calculator/
+- Version: 1.2.0
+- Date: February 22, 2026
