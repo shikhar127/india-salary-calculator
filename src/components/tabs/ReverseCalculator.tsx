@@ -9,8 +9,8 @@ import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { STATES } from '../../utils/constants'
 
 export function ReverseCalculator() {
-  const [targetValue, setTargetValue] = useState<number>(100000)
-  const [targetInput, setTargetInput] = useState<string>(formatNumber(100000))
+  const [targetValue, setTargetValue] = useState<number>(0)
+  const [targetInput, setTargetInput] = useState<string>('')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)

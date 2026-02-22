@@ -14,8 +14,9 @@ import { calculateTax, calcPF } from '../../utils/taxLogic'
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
 
 export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number | null; onCtcChange?: (ctc: number) => void }) {
-  const [ctcInput, setCtcInput] = useState<string>(formatNumber(savedCtc || 0))
-  const [ctc, setCtc] = useState<number>(savedCtc || 0)
+  const initialCtc = savedCtc && savedCtc > 0 ? savedCtc : 0
+  const [ctcInput, setCtcInput] = useState<string>(initialCtc > 0 ? formatNumber(initialCtc) : '')
+  const [ctc, setCtc] = useState<number>(initialCtc)
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [variablePay, setVariablePay] = useState<number>(0)
   const [isMetro, setIsMetro] = useState<boolean>(true)
@@ -35,6 +36,14 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     }, 300)
     return () => clearTimeout(timer)
   }, [ctcInput])
+
+  // Sync savedCtc from onboarding on mount
+  useEffect(() => {
+    if (savedCtc && savedCtc > 0 && ctc === 0) {
+      setCtc(savedCtc)
+      setCtcInput(formatNumber(savedCtc))
+    }
+  }, [savedCtc])
 
   // Notify parent when CTC changes
   useEffect(() => {

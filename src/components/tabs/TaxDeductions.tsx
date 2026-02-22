@@ -17,8 +17,9 @@ type AgeGroup = 'below60' | '60to79' | '80plus'
 
 export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
   // CTC and PF mode states
-  const [ctc, setCtc] = useState<number>(sharedCtc || 0)
-  const [ctcInput, setCtcInput] = useState<string>(sharedCtc ? formatNumber(sharedCtc) : '')
+  const initialCtc = sharedCtc && sharedCtc > 0 ? sharedCtc : 0
+  const [ctc, setCtc] = useState<number>(initialCtc)
+  const [ctcInput, setCtcInput] = useState<string>(initialCtc > 0 ? formatNumber(initialCtc) : '')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [showDeductions, setShowDeductions] = useState<boolean>(false)
 
@@ -36,12 +37,12 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
   const [comparison, setComparison] = useState<any>(null)
 
   // String states for formatted display
-  const [section80CInput, setSection80CInput] = useState<string>('0')
-  const [section80DInput, setSection80DInput] = useState<string>('0')
-  const [hraReceivedInput, setHraReceivedInput] = useState<string>('0')
-  const [rentPaidInput, setRentPaidInput] = useState<string>('0')
-  const [npsInput, setNpsInput] = useState<string>('0')
-  const [employerNpsInput, setEmployerNpsInput] = useState<string>('0')
+  const [section80CInput, setSection80CInput] = useState<string>('')
+  const [section80DInput, setSection80DInput] = useState<string>('')
+  const [hraReceivedInput, setHraReceivedInput] = useState<string>('')
+  const [rentPaidInput, setRentPaidInput] = useState<string>('')
+  const [npsInput, setNpsInput] = useState<string>('')
+  const [employerNpsInput, setEmployerNpsInput] = useState<string>('')
 
   // Calculate derived values from CTC
   const basicSalary = ctc * 0.5
@@ -130,7 +131,7 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
               onFocus={(e) => setCtcInput(e.target.value.replace(/,/g, ''))}
               onBlur={(e) => {
                 const n = Number(e.target.value.replace(/,/g, ''))
-                setCtcInput(n > 0 ? formatNumber(n) : '0')
+                setCtcInput(n > 0 ? formatNumber(n) : '')
               }}
             />
             <p className="text-xs text-secondary mt-1">Your total Cost to Company</p>
@@ -280,7 +281,7 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
                     onFocus={(e) => setHraReceivedInput(e.target.value.replace(/,/g, ''))}
                     onBlur={(e) => {
                       const n = Number(e.target.value.replace(/,/g, ''))
-                      setHraReceivedInput(n > 0 ? formatNumber(n) : '0')
+                      setHraReceivedInput(n > 0 ? formatNumber(n) : '')
                     }}
                   />
                   <p className="text-xs text-secondary mt-1">Annual HRA component from your salary</p>
@@ -299,7 +300,7 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
                   onFocus={(e) => setRentPaidInput(e.target.value.replace(/,/g, ''))}
                   onBlur={(e) => {
                     const n = Number(e.target.value.replace(/,/g, ''))
-                    setRentPaidInput(n > 0 ? formatNumber(n) : '0')
+                    setRentPaidInput(n > 0 ? formatNumber(n) : '')
                   }}
                 />
                 <Toggle
@@ -327,7 +328,7 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
             onFocus={(e) => setSection80CInput(e.target.value.replace(/,/g, ''))}
             onBlur={(e) => {
               const n = Number(e.target.value.replace(/,/g, ''))
-              setSection80CInput(n > 0 ? formatNumber(n) : '0')
+              setSection80CInput(n > 0 ? formatNumber(n) : '')
             }}
             suffix="/ 1.5L"
           />
@@ -345,7 +346,7 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
             onFocus={(e) => setSection80DInput(e.target.value.replace(/,/g, ''))}
             onBlur={(e) => {
               const n = Number(e.target.value.replace(/,/g, ''))
-              setSection80DInput(n > 0 ? formatNumber(n) : '0')
+              setSection80DInput(n > 0 ? formatNumber(n) : '')
             }}
           />
           <div>
@@ -363,7 +364,7 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
               onFocus={(e) => setNpsInput(e.target.value.replace(/,/g, ''))}
               onBlur={(e) => {
                 const n = Number(e.target.value.replace(/,/g, ''))
-                setNpsInput(n > 0 ? formatNumber(n) : '0')
+                setNpsInput(n > 0 ? formatNumber(n) : '')
               }}
               suffix="/ 50k"
             />
@@ -384,7 +385,7 @@ export function TaxDeductions({ sharedCtc }: { sharedCtc?: number }) {
               onFocus={(e) => setEmployerNpsInput(e.target.value.replace(/,/g, ''))}
               onBlur={(e) => {
                 const n = Number(e.target.value.replace(/,/g, ''))
-                setEmployerNpsInput(n > 0 ? formatNumber(n) : '0')
+                setEmployerNpsInput(n > 0 ? formatNumber(n) : '')
               }}
               suffix={`/ ${((basicSalary * 0.14) / 1000).toFixed(0)}k`}
             />
