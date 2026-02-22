@@ -139,6 +139,41 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
 
   return (
     <div className="space-y-6 pb-24">
+      {ctc > 0 && (
+        <div className="text-center space-y-1 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em]">
+            {showAnnual ? 'Annual Take Home' : 'Monthly In-Hand'}
+          </p>
+          <div className="py-2">
+            {results ? (
+              <DisplayAmount
+                amount={showAnnual ? results.annualInHand : results.monthlyInHand}
+                size="hero"
+                suffix={showAnnual ? '/yr' : '/mo'}
+                showWords
+              />
+            ) : (
+              <p className="text-secondary text-sm py-6">Calculating...</p>
+            )}
+          </div>
+          {results && (
+            <div className="flex justify-center pt-1">
+              <span className="text-xs font-medium px-3 py-1 bg-bg-secondary rounded-full text-secondary">
+                {taxRegime === 'new' ? 'New' : 'Old'} tax regime
+              </span>
+            </div>
+          )}
+          <div className="flex justify-center pt-3">
+            <Toggle
+              value={showAnnual}
+              onChange={setShowAnnual}
+              leftLabel="Monthly"
+              rightLabel="Annual"
+            />
+          </div>
+        </div>
+      )}
+
       <Card>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -278,39 +313,6 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
         </div>
       ) : (
         <>
-          <div className="text-center space-y-1 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em]">
-              {showAnnual ? 'Annual Take Home' : 'Monthly In-Hand'}
-            </p>
-            <div className="py-2">
-              {results ? (
-                <DisplayAmount
-                  amount={showAnnual ? results.annualInHand : results.monthlyInHand}
-                  size="hero"
-                  suffix={showAnnual ? '/yr' : '/mo'}
-                  showWords
-                />
-              ) : (
-                <p className="text-secondary text-sm py-6">Calculating...</p>
-              )}
-            </div>
-            {results && (
-              <div className="flex justify-center pt-1">
-                <span className="text-xs font-medium px-3 py-1 bg-bg-secondary rounded-full text-secondary">
-                  {taxRegime === 'new' ? 'New' : 'Old'} tax regime
-                </span>
-              </div>
-            )}
-            <div className="flex justify-center pt-3">
-              <Toggle
-                value={showAnnual}
-                onChange={setShowAnnual}
-                leftLabel="Monthly"
-                rightLabel="Annual"
-              />
-            </div>
-          </div>
-
           {results && (
             <>
               <div className="space-y-3">
