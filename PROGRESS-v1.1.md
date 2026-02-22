@@ -7,7 +7,7 @@
 - [x] Sprint 3: Currency Formatting in Hike & Reverse Tabs
 - [x] Sprint 4: Hike Calculator Enhancement
 - [x] Sprint 5: Onboarding CTC Capture
-- [ ] Sprint 6: Testing, Build & Deploy
+- [x] Sprint 6: Testing, Build & Deploy
 
 ---
 
@@ -50,3 +50,14 @@
 - Pre-fill HikeCompare with saved CTC
 - Modal appears only on first visit
 - CTC persists across sessions via localStorage
+
+### ✅ Sprint 6: Testing, Build & Deploy
+- Updated package.json version to 1.1.0
+- Built web app with GitHub Pages base
+- Built APK with Capacitor base (3.2 MB)
+- Built AAB with Capacitor base (3.0 MB)
+- Signed both APK and AAB with release keystore
+- Generated SHA256 checksums for verification
+- Copied v1.1 releases to ~/SalaryFit-Releases/
+- Deployed web app to GitHub Pages
+- All 6 enhancements successfully implemented and shipped!
