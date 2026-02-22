@@ -7,6 +7,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   prefix?: string
   suffixClassName?: string
   prefixClassName?: string
+  inputClassName?: string
 }
 
 export function Input({
@@ -16,6 +17,7 @@ export function Input({
   prefix,
   suffixClassName = '',
   prefixClassName = '',
+  inputClassName = '',
   className = '',
   id,
   ...props
@@ -44,6 +46,7 @@ export function Input({
             ${prefix ? 'pl-7' : 'pl-4'}
             ${suffix ? (suffixClassName ? 'pr-24' : 'pr-12') : 'pr-4'}
             py-3 text-sm outline-none
+            ${inputClassName}
             ${error ? 'border border-accent-danger' : ''}
           `}
           {...props}

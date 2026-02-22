@@ -143,6 +143,31 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
       <div className="pt-4">
         <h2 className="text-2xl font-bold mb-4">Regime Comparison</h2>
 
+        {ctc > 0 && (
+          <div
+            className={`p-6 rounded-2xl mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 ${comparison.better === 'new' ? 'bg-black text-white' : 'bg-white border border-border-default'}`}
+          >
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <p className={`text-xs font-semibold uppercase tracking-[0.12em] mb-1 ${comparison.better === 'new' ? 'text-gray-500' : 'text-secondary'}`}>
+                  Recommendation
+                </p>
+                <h3 className="text-xl font-bold">Choose {comparison.better === 'new' ? 'New' : 'Old'} Regime</h3>
+              </div>
+              {comparison.better === 'new' && <CheckCircle2 className="text-accent-green h-6 w-6" />}
+            </div>
+            <div className="mt-4 flex flex-col items-start gap-1">
+              <div className="flex items-center gap-2">
+                <DisplayAmount amount={comparison.savings} size="lg" color="text-accent-green" />
+                <span className="text-sm font-medium opacity-60">saved</span>
+              </div>
+              <span className={`text-[0.62rem] font-medium tracking-widest uppercase opacity-40 ${comparison.better === 'new' ? '' : 'text-accent-green'}`}>
+                {numberToWords(comparison.savings)}
+              </span>
+            </div>
+          </div>
+        )}
+
         <Card className="space-y-4 mb-6">
           <div>
             <Input
@@ -168,7 +193,7 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
             <Toggle
               value={pfMode === 'full'}
               onChange={(val) => setPfMode(val ? 'full' : 'capped')}
-              leftLabel="₹18,000 cap"
+              leftLabel="₹1,800/mo"
               rightLabel="12% of basic"
             />
             <p className="text-xs text-secondary mt-1">
@@ -231,29 +256,6 @@ export function TaxDeductions({ sharedCtc, onCtcChange }: { sharedCtc?: number; 
           </div>
         ) : (
           <>
-            <div
-              className={`p-6 rounded-2xl mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 ${comparison.better === 'new' ? 'bg-black text-white' : 'bg-white border border-border-default'}`}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <p className={`text-xs font-semibold uppercase tracking-[0.12em] mb-1 ${comparison.better === 'new' ? 'text-gray-500' : 'text-secondary'}`}>
-                    Recommendation
-                  </p>
-                  <h3 className="text-xl font-bold">Choose {comparison.better === 'new' ? 'New' : 'Old'} Regime</h3>
-                </div>
-                {comparison.better === 'new' && <CheckCircle2 className="text-accent-green h-6 w-6" />}
-              </div>
-              <div className="mt-4 flex flex-col items-start gap-1">
-                <div className="flex items-center gap-2">
-                  <DisplayAmount amount={comparison.savings} size="lg" color="text-accent-green" />
-                  <span className="text-sm font-medium opacity-60">saved</span>
-                </div>
-                <span className={`text-[0.62rem] font-medium tracking-widest uppercase opacity-40 ${comparison.better === 'new' ? '' : 'text-accent-green'}`}>
-                  {numberToWords(comparison.savings)}
-                </span>
-              </div>
-            </div>
-
             <div className="grid grid-cols-2 gap-3 mb-6">
               <Card className={comparison.better === 'new' ? 'ring-2 ring-accent-green' : ''}>
                 <p className="text-xs text-secondary uppercase font-bold tracking-wide mb-2">New Regime</p>

@@ -70,6 +70,46 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
     <div className="space-y-6 pb-24 pt-4">
       <h2 className="text-2xl font-bold">Hike Calculator</h2>
 
+      {currentCtc > 0 && (
+        <div className="bg-black text-white rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center gap-2 text-accent-green mb-5">
+            <TrendingUp className="h-5 w-5" />
+            <span className="font-bold text-xs uppercase tracking-[0.12em]">Projected Growth</span>
+          </div>
+
+          <div className="mb-5 pb-5 border-b border-gray-800">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-2">Annual Hike</p>
+            <div className="flex items-baseline gap-3">
+              <p className="text-2xl font-bold text-accent-green">+{formatIndianCurrency(newCtc - currentCtc)}</p>
+              <p className="text-lg font-semibold text-gray-400">({hikePercent}%)</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">Current</p>
+              <p className="text-xl font-bold text-gray-400">
+                {formatIndianCurrency(currentInHand)}
+                <span className="text-sm font-normal text-gray-600 ml-0.5">/mo</span>
+              </p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-gray-600 flex-shrink-0" />
+            <div className="flex-1 text-right">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">After Hike</p>
+              <p className="text-xl font-bold text-white">
+                {formatIndianCurrency(newInHand)}
+                <span className="text-sm font-normal text-gray-400 ml-0.5">/mo</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-800 flex justify-between items-center">
+            <span className="text-sm text-gray-500">Monthly Increase</span>
+            <span className="text-xl font-bold text-accent-green">+{formatIndianCurrency(diff)}</span>
+          </div>
+        </div>
+      )}
+
       <Card>
         <div className="space-y-4">
           <Input
@@ -202,44 +242,6 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
         </div>
       ) : (
         <>
-          <div className="bg-black text-white rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center gap-2 text-accent-green mb-5">
-              <TrendingUp className="h-5 w-5" />
-              <span className="font-bold text-xs uppercase tracking-[0.12em]">Projected Growth</span>
-            </div>
-
-            <div className="mb-5 pb-5 border-b border-gray-800">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-2">Annual Hike</p>
-              <div className="flex items-baseline gap-3">
-                <p className="text-2xl font-bold text-accent-green">+{formatIndianCurrency(newCtc - currentCtc)}</p>
-                <p className="text-lg font-semibold text-gray-400">({hikePercent}%)</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">Current</p>
-                <p className="text-xl font-bold text-gray-400">
-                  {formatIndianCurrency(currentInHand)}
-                  <span className="text-sm font-normal text-gray-600 ml-0.5">/mo</span>
-                </p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-gray-600 flex-shrink-0" />
-              <div className="flex-1 text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">After Hike</p>
-                <p className="text-xl font-bold text-white">
-                  {formatIndianCurrency(newInHand)}
-                  <span className="text-sm font-normal text-gray-400 ml-0.5">/mo</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-gray-800 flex justify-between items-center">
-              <span className="text-sm text-gray-500">Monthly Increase</span>
-              <span className="text-xl font-bold text-accent-green">+{formatIndianCurrency(diff)}</span>
-            </div>
-          </div>
-
           <div className="text-center py-2">
             <p className="text-secondary text-xs font-semibold uppercase tracking-[0.12em] mb-2">New Annual CTC</p>
             <DisplayAmount amount={newCtc} size="md" showWords />

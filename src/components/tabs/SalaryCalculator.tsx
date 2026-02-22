@@ -141,21 +141,21 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     <div className="space-y-6 pb-24">
       <Card>
         <div className="space-y-4">
-          <Input
-            label="Annual CTC"
-            type="text"
-            inputMode="decimal"
-            value={ctcLakhInput}
-            onChange={(e) => setCtcLakhInput(sanitizeLakhInput(e.target.value))}
-            onBlur={(e) => {
-              setCtcLakhInput(formatLakhValue(lakhInputToRupees(e.target.value)))
-            }}
-            placeholder="e.g. 12.5"
-            suffix="LAKH"
-            suffixClassName="text-primary font-extrabold tracking-wide text-base"
-          />
-
           <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Annual CTC"
+              type="text"
+              inputMode="decimal"
+              value={ctcLakhInput}
+              onChange={(e) => setCtcLakhInput(sanitizeLakhInput(e.target.value))}
+              onBlur={(e) => {
+                setCtcLakhInput(formatLakhValue(lakhInputToRupees(e.target.value)))
+              }}
+              placeholder="e.g. 12.5"
+              suffix="LAKH"
+              suffixClassName="text-primary font-black tracking-wide text-lg"
+              inputClassName="text-xl font-bold py-4"
+            />
             <div>
               <Input
                 label="Basic Salary (%)"
@@ -164,16 +164,11 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
                 value={basicPercent}
                 onChange={(e) => setBasicPercent(Number(e.target.value))}
                 placeholder="40–60%"
+                suffixClassName="text-primary font-black text-lg"
+                inputClassName="text-xl font-bold py-4"
               />
               {basicWarning && <p className="text-xs text-amber-600 mt-1">Typical range is 30–70%</p>}
             </div>
-            <Input
-              label="Variable Pay (Annual)"
-              prefix="₹"
-              type="number"
-              value={variablePay}
-              onChange={(e) => setVariablePay(Number(e.target.value))}
-            />
           </div>
 
           <button
@@ -192,6 +187,14 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
 
           {showAdvanced && (
             <>
+              <Input
+                label="Variable Pay (Annual)"
+                prefix="₹"
+                type="number"
+                value={variablePay}
+                onChange={(e) => setVariablePay(Number(e.target.value))}
+              />
+
               <div className="grid grid-cols-2 gap-4">
                 <Select
                   label="Tax Regime"
