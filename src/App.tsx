@@ -1,10 +1,20 @@
 import React, { useEffect, useRef, useState, Component } from 'react'
 
 class ErrorBoundary extends Component<{children: React.ReactNode}, {error: string | null}> {
-  constructor(props: any) { super(props); this.state = { error: null } }
+  constructor(props: {children: React.ReactNode}) { super(props); this.state = { error: null } }
   static getDerivedStateFromError(e: Error) { return { error: e.message + '\n' + e.stack } }
   render() {
-    if (this.state.error) return <pre style={{padding:16,color:'red',fontSize:12,whiteSpace:'pre-wrap'}}>{this.state.error}</pre>
+    if (this.state.error) {
+      if (import.meta.env.DEV) {
+        return <pre style={{padding:16,color:'red',fontSize:12,whiteSpace:'pre-wrap'}}>{this.state.error}</pre>
+      }
+      return (
+        <div style={{ padding: 16 }}>
+          <h2 style={{ fontWeight: 700, marginBottom: 8 }}>Something went wrong</h2>
+          <p style={{ color: '#666', fontSize: 14 }}>Please refresh the app and try again.</p>
+        </div>
+      )
+    }
     return this.props.children
   }
 }
@@ -32,7 +42,9 @@ function App() {
     if (!hasSeenOnboarding) {
       setShowOnboarding(true)
     } else if (storedCtc) {
-      setSavedCtc(Number(storedCtc))
+      const parsed = Number(storedCtc)
+      setSavedCtc(parsed)
+      setSharedCtc(parsed)
     }
   }, [])
 
@@ -54,7 +66,7 @@ function App() {
     setActiveTab(tab)
     setNavVisible(true)
     lastScrollY.current = 0
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }
 
   const handleOnboardingComplete = (ctc: number | null) => {
@@ -62,14 +74,15 @@ function App() {
     if (ctc) {
       localStorage.setItem('savedCtc', ctc.toString())
       setSavedCtc(ctc)
+      setSharedCtc(ctc)
     }
     setShowOnboarding(false)
   }
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'salary': return <SalaryCalculator savedCtc={savedCtc} onCtcChange={setSharedCtc} />
-      case 'tax': return <TaxDeductions sharedCtc={sharedCtc} />
+      case 'salary': return <SalaryCalculator savedCtc={sharedCtc > 0 ? sharedCtc : savedCtc} onCtcChange={setSharedCtc} />
+      case 'tax': return <TaxDeductions sharedCtc={sharedCtc} onCtcChange={setSharedCtc} />
       case 'hike': return <HikeCompare savedCtc={savedCtc} sharedCtc={sharedCtc} />
       case 'reverse': return <ReverseCalculator />
     }

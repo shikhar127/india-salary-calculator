@@ -9,7 +9,8 @@ import { Toggle } from '../ui/Toggle'
 import { DisplayAmount, RowAmount } from '../ui/DisplayAmount'
 import { STATES } from '../../utils/constants'
 import { formatIndianCurrency, formatShorthand, formatNumber } from '../../utils/formatting'
-import { calculateTax, calcPF } from '../../utils/taxLogic'
+import { calculateSalaryBreakdown, SalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
+import { ProfessionalTaxMode } from '../../utils/professionalTax'
 
 const COLORS = ['#000000', '#6B6B6B', '#999999', '#E5E5E5']
 
@@ -24,10 +25,13 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [showAnnual, setShowAnnual] = useState<boolean>(false)
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
-  const [results, setResults] = useState<any>(null)
+  const [taxRegime, setTaxRegime] = useState<TaxRegime>('new')
+  const [professionalTaxMode, setProfessionalTaxMode] = useState<ProfessionalTaxMode>('state')
+  const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
+  const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
+  const [results, setResults] = useState<SalaryBreakdown | null>(null)
   const [copied, setCopied] = useState<boolean>(false)
 
-  // Debounce ctcInput → ctc (300ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       const val = Number(ctcInput.replace(/,/g, ''))
@@ -37,15 +41,13 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     return () => clearTimeout(timer)
   }, [ctcInput])
 
-  // Sync savedCtc from onboarding on mount
   useEffect(() => {
-    if (savedCtc && savedCtc > 0 && ctc === 0) {
+    if (savedCtc && savedCtc > 0 && savedCtc !== ctc) {
       setCtc(savedCtc)
       setCtcInput(formatNumber(savedCtc))
     }
-  }, [savedCtc])
+  }, [savedCtc, ctc])
 
-  // Notify parent when CTC changes
   useEffect(() => {
     if (onCtcChange) {
       onCtcChange(ctc)
@@ -57,58 +59,48 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
       setResults(null)
       return
     }
-    calculateSalary()
-  }, [ctc, basicPercent, variablePay, isMetro, selectedState, pfMode])
 
-  const calculateSalary = () => {
-    const annualBasic = (ctc * basicPercent) / 100
-    const annualHRA = annualBasic * (isMetro ? 0.5 : 0.4)
-
-    const annualEmployerPF = pfMode === 'capped' ? calcPF(annualBasic) : annualBasic * 0.12
-    const annualGross = ctc - annualEmployerPF
-    const annualSpecial = Math.max(0, annualGross - annualBasic - annualHRA - variablePay)
-    const annualEmployeePF = pfMode === 'capped' ? calcPF(annualBasic) : annualBasic * 0.12
-
-    const stateData = STATES.find((s) => s.name === selectedState) || STATES[0]
-    const annualPT = stateData.pt
-
-    const monthlyGross = annualGross / 12
-    const annualEmployeeESI = monthlyGross <= 21000 ? annualGross * 0.0075 : 0
-    const annualEmployerESI = monthlyGross <= 21000 ? annualGross * 0.0325 : 0
-
-    const { totalTax: annualTax } = calculateTax(annualGross, 'new')
-
-    const annualDeductions = annualEmployeePF + annualPT + annualEmployeeESI + annualTax
-    const annualInHand = annualGross - annualDeductions
-    const monthlyInHand = annualInHand / 12
-
-    setResults({
-      monthlyInHand,
-      annualInHand,
-      annualBasic,
-      annualHRA,
-      annualSpecial,
-      annualGross,
-      annualEmployeePF,
-      annualEmployerPF,
-      annualPT,
-      annualTax,
-      annualDeductions,
-      annualEmployeeESI,
-      annualEmployerESI,
+    const breakdown = calculateSalaryBreakdown({
+      ctc,
+      basicPercent,
+      variablePay,
+      isMetro,
+      stateName: selectedState,
+      pfMode,
+      taxRegime,
+      professionalTaxMode,
+      manualProfessionalTaxAnnual,
     })
-  }
+
+    setResults(breakdown)
+  }, [
+    ctc,
+    basicPercent,
+    variablePay,
+    isMetro,
+    selectedState,
+    pfMode,
+    taxRegime,
+    professionalTaxMode,
+    manualProfessionalTaxAnnual,
+  ])
 
   const handleShare = async () => {
     const text = `My salary breakdown (CTC: ${formatIndianCurrency(ctc)})\nMonthly In-Hand: ${formatIndianCurrency(results?.monthlyInHand ?? 0)}\nCalculated via SalaryFit`
     if (navigator.share) {
       try {
         await navigator.share({ title: 'My Salary Breakdown', text })
-      } catch {}
+      } catch {
+        // User cancelled or share failed.
+      }
     } else {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      try {
+        await navigator.clipboard.writeText(text)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch {
+        setCopied(false)
+      }
     }
   }
 
@@ -130,7 +122,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
     doc.text('--- Deductions ---', 20, 144)
     doc.text(`Employee PF: ${formatIndianCurrency(results.annualEmployeePF)}`, 20, 156)
     doc.text(`Professional Tax: ${formatIndianCurrency(results.annualPT)}`, 20, 168)
-    doc.text(`Income Tax (New Regime): ${formatIndianCurrency(results.annualTax)}`, 20, 180)
+    doc.text(`Income Tax (${taxRegime === 'new' ? 'New' : 'Old'} Regime): ${formatIndianCurrency(results.annualTax)}`, 20, 180)
     doc.text(`Total Deductions: ${formatIndianCurrency(results.annualDeductions)}`, 20, 192)
     doc.save('salary-breakdown.pdf')
   }
@@ -148,7 +140,6 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Inputs */}
       <Card>
         <div className="space-y-4">
           <Input
@@ -169,6 +160,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
             }}
             placeholder="e.g. 12,00,000"
           />
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
@@ -179,18 +171,17 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
                 onChange={(e) => setBasicPercent(Number(e.target.value))}
                 placeholder="40–60%"
               />
-              {basicWarning && (
-                <p className="text-xs text-amber-600 mt-1">Typical range is 30–70%</p>
-              )}
+              {basicWarning && <p className="text-xs text-amber-600 mt-1">Typical range is 30–70%</p>}
             </div>
             <Input
-              label="Variable Pay"
+              label="Variable Pay (Annual)"
               prefix="₹"
               type="number"
               value={variablePay}
               onChange={(e) => setVariablePay(Number(e.target.value))}
             />
           </div>
+
           <button
             onClick={() => setShowAdvanced((v) => !v)}
             className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1"
@@ -198,14 +189,25 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
             <span>More Options</span>
             <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
           </button>
+
           {!showAdvanced && (
             <p className="text-xs text-secondary -mt-1">
-              {isMetro ? 'Metro' : 'Non-Metro'} · {selectedState} · PF {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
+              {isMetro ? 'Metro' : 'Non-Metro'} · {selectedState} · {taxRegime === 'new' ? 'New' : 'Old'} regime · PF {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
             </p>
           )}
+
           {showAdvanced && (
             <>
               <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="Tax Regime"
+                  value={taxRegime}
+                  onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
+                  options={[
+                    { label: 'New Regime', value: 'new' },
+                    { label: 'Old Regime', value: 'old' },
+                  ]}
+                />
                 <Select
                   label="City Type"
                   value={isMetro ? 'metro' : 'non-metro'}
@@ -215,13 +217,46 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
                     { label: 'Non-Metro', value: 'non-metro' },
                   ]}
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <Select
                   label="State"
                   value={selectedState}
                   onChange={(e) => setSelectedState(e.target.value)}
                   options={STATES.map((s) => ({ label: s.name, value: s.name }))}
                 />
+                <Select
+                  label="Professional Tax"
+                  value={professionalTaxMode}
+                  onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
+                  options={[
+                    { label: 'State estimate', value: 'state' },
+                    { label: 'Manual annual', value: 'manual' },
+                  ]}
+                />
               </div>
+
+              {professionalTaxMode === 'manual' && (
+                <Input
+                  label="Professional Tax (Annual)"
+                  prefix="₹"
+                  type="text"
+                  inputMode="numeric"
+                  value={manualProfessionalTaxAnnualInput}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/[^0-9]/g, '')
+                    setManualProfessionalTaxAnnualInput(cleaned)
+                    setManualProfessionalTaxAnnual(Number(cleaned))
+                  }}
+                  onFocus={(e) => setManualProfessionalTaxAnnualInput(e.target.value.replace(/,/g, ''))}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value.replace(/,/g, ''))
+                    setManualProfessionalTaxAnnualInput(n > 0 ? formatNumber(n) : '')
+                  }}
+                />
+              )}
+
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
                 <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
@@ -246,7 +281,6 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
         </div>
       ) : (
         <>
-          {/* Hero Section */}
           <div className="text-center space-y-1 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em]">
               {showAnnual ? 'Annual Take Home' : 'Monthly In-Hand'}
@@ -266,7 +300,7 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
             {results && (
               <div className="flex justify-center pt-1">
                 <span className="text-xs font-medium px-3 py-1 bg-bg-secondary rounded-full text-secondary">
-                  New tax regime · compare in Tax tab
+                  {taxRegime === 'new' ? 'New' : 'Old'} tax regime
                 </span>
               </div>
             )}
@@ -281,102 +315,99 @@ export function SalaryCalculator({ savedCtc, onCtcChange }: { savedCtc?: number 
           </div>
 
           {results && (
-        <>
-          {/* Salary Breakdown */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold px-1">Salary Breakdown</h3>
-            <Card className="space-y-3">
-              <BreakdownRow label="Basic Salary" value={results.annualBasic} showAnnual={showAnnual} />
-              <BreakdownRow label="HRA" value={results.annualHRA} showAnnual={showAnnual} />
-              <BreakdownRow
-                label="Special Allowance"
-                value={results.annualSpecial}
-                showAnnual={showAnnual}
-                info="Whatever's left after allocating Basic, HRA, and Variable Pay from Gross. Most companies park unallocated amounts here."
-              />
-              {variablePay > 0 && (
-                <BreakdownRow
-                  label="Variable Pay"
-                  value={variablePay}
-                  showAnnual={showAnnual}
-                  note={!showAnnual ? `Annual total: ${formatIndianCurrency(variablePay)} · paid at year-end` : undefined}
-                />
-              )}
-              <div className="h-px bg-border-default" />
-              <BreakdownRow label="Gross Salary" value={results.annualGross} showAnnual={showAnnual} bold />
-            </Card>
-
-            <h3 className="text-lg font-bold px-1 pt-2">Deductions</h3>
-            <Card className="space-y-3">
-              <BreakdownRow label="Employee PF" value={results.annualEmployeePF} showAnnual={showAnnual} />
-              <BreakdownRow label="Professional Tax" value={results.annualPT} showAnnual={showAnnual} />
-              {results.annualEmployeeESI > 0 && (
-                <BreakdownRow
-                  label="Employee State Insurance (ESI)"
-                  value={results.annualEmployeeESI}
-                  showAnnual={showAnnual}
-                  info="Applicable because your gross is below ₹21,000/month. Employee contributes 0.75%."
-                />
-              )}
-              <BreakdownRow label="Income Tax (New Regime)" value={results.annualTax} showAnnual={showAnnual} danger />
-              <div className="h-px bg-border-default" />
-              <BreakdownRow label="Total Deductions" value={results.annualDeductions} showAnnual={showAnnual} bold />
-            </Card>
-          </div>
-
-          {/* Chart */}
-          <Card>
-            <h3 className="text-sm font-bold mb-4">CTC Distribution</h3>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                    <Label
-                      value={formatShorthand(ctc)}
-                      position="center"
-                      style={{ fontSize: '13px', fontWeight: 700, fill: '#000' }}
+            <>
+              <div className="space-y-3">
+                <h3 className="text-lg font-bold px-1">Salary Breakdown</h3>
+                <Card className="space-y-3">
+                  <BreakdownRow label="Basic Salary" value={results.annualBasic} showAnnual={showAnnual} />
+                  <BreakdownRow label="HRA" value={results.annualHRA} showAnnual={showAnnual} />
+                  <BreakdownRow
+                    label="Special Allowance"
+                    value={results.annualSpecial}
+                    showAnnual={showAnnual}
+                    info="Whatever's left after allocating Basic, HRA, and Variable Pay from Gross. Most companies park unallocated amounts here."
+                  />
+                  {variablePay > 0 && (
+                    <BreakdownRow
+                      label="Variable Pay"
+                      value={variablePay}
+                      showAnnual={showAnnual}
+                      note={!showAnnual ? `Paid annually. Net annual payout estimate: ${formatIndianCurrency(results.annualVariableNet)}` : undefined}
                     />
-                  </Pie>
-                  <Tooltip formatter={(value: number) => formatIndianCurrency(value)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4">
-              {chartData.map((entry, index) => (
-                <div key={index} className="flex items-start text-xs">
-                  <div className="w-3 h-3 rounded-full mr-2 mt-0.5 flex-shrink-0" style={{ backgroundColor: COLORS[index] }} />
-                  <div>
-                    <span className="text-secondary block">{entry.name}</span>
-                    <span className="font-semibold block">{formatIndianCurrency(entry.value)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+                  )}
+                  <div className="h-px bg-border-default" />
+                  <BreakdownRow label="Gross Salary" value={results.annualGross} showAnnual={showAnnual} bold />
+                </Card>
 
-          {/* Actions */}
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="secondary" onClick={handleShare}>
-              <Share2 className="w-4 h-4 mr-2" /> {copied ? 'Copied!' : 'Share'}
-            </Button>
-            <Button variant="secondary" onClick={handlePDF}>
-              <Download className="w-4 h-4 mr-2" /> PDF
-            </Button>
-          </div>
+                <h3 className="text-lg font-bold px-1 pt-2">Deductions</h3>
+                <Card className="space-y-3">
+                  <BreakdownRow label="Employee PF" value={results.annualEmployeePF} showAnnual={showAnnual} />
+                  <BreakdownRow label="Professional Tax" value={results.annualPT} showAnnual={showAnnual} />
+                  {results.annualEmployeeESI > 0 && (
+                    <BreakdownRow
+                      label="Employee State Insurance (ESI)"
+                      value={results.annualEmployeeESI}
+                      showAnnual={showAnnual}
+                      info="Applicable because your gross is below ₹21,000/month. Employee contributes 0.75%."
+                    />
+                  )}
+                  <BreakdownRow label={`Income Tax (${taxRegime === 'new' ? 'New' : 'Old'} Regime)`} value={results.annualTax} showAnnual={showAnnual} danger />
+                  <div className="h-px bg-border-default" />
+                  <BreakdownRow label="Total Deductions" value={results.annualDeductions} showAnnual={showAnnual} bold />
+                </Card>
+              </div>
+
+              <Card>
+                <h3 className="text-sm font-bold mb-4">CTC Distribution</h3>
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                        <Label
+                          value={formatShorthand(ctc)}
+                          position="center"
+                          style={{ fontSize: '13px', fontWeight: 700, fill: '#000' }}
+                        />
+                      </Pie>
+                      <Tooltip formatter={(value: number) => formatIndianCurrency(value)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4">
+                  {chartData.map((entry, index) => (
+                    <div key={index} className="flex items-start text-xs">
+                      <div className="w-3 h-3 rounded-full mr-2 mt-0.5 flex-shrink-0" style={{ backgroundColor: COLORS[index] }} />
+                      <div>
+                        <span className="text-secondary block">{entry.name}</span>
+                        <span className="font-semibold block">{formatIndianCurrency(entry.value)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Button variant="secondary" onClick={handleShare}>
+                  <Share2 className="w-4 h-4 mr-2" /> {copied ? 'Copied!' : 'Share'}
+                </Button>
+                <Button variant="secondary" onClick={handlePDF}>
+                  <Download className="w-4 h-4 mr-2" /> PDF
+                </Button>
+              </div>
+            </>
+          )}
         </>
-      )}
-      </>
       )}
     </div>
   )
@@ -420,9 +451,7 @@ function BreakdownRow({
         <RowAmount amount={displayVal} bold={bold} danger={danger} />
       </div>
       {note && <p className="text-xs text-secondary mt-0.5">{note}</p>}
-      {info && showInfo && (
-        <p className="text-xs text-secondary mt-1.5 leading-relaxed">{info}</p>
-      )}
+      {info && showInfo && <p className="text-xs text-secondary mt-1.5 leading-relaxed">{info}</p>}
     </div>
   )
 }

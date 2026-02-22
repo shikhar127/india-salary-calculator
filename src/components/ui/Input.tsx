@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useId } from 'react'
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -8,7 +8,8 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export function Input({ label, error, suffix, prefix, className = '', id, ...props }: InputProps) {
-  const inputId = id || Math.random().toString(36).substr(2, 9)
+  const generatedId = useId()
+  const inputId = id || generatedId
   return (
     <div className={`w-full ${className}`}>
       {label && (

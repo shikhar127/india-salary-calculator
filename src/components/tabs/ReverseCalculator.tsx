@@ -5,8 +5,9 @@ import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { formatIndianCurrency, formatNumber } from '../../utils/formatting'
-import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { STATES } from '../../utils/constants'
+import { calculateSalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
+import { ProfessionalTaxMode } from '../../utils/professionalTax'
 
 export function ReverseCalculator() {
   const [targetValue, setTargetValue] = useState<number>(0)
@@ -14,58 +15,83 @@ export function ReverseCalculator() {
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+  const [basicPercent, setBasicPercent] = useState<number>(50)
+  const [variablePay, setVariablePay] = useState<number>(0)
+  const [isMetro, setIsMetro] = useState<boolean>(true)
+  const [taxRegime, setTaxRegime] = useState<TaxRegime>('new')
+  const [professionalTaxMode, setProfessionalTaxMode] = useState<ProfessionalTaxMode>('state')
+  const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
+  const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
 
   const targetInHand = targetValue
 
   const result = useMemo(() => {
     if (targetValue <= 0) return null
-    const stateData = STATES.find((s) => s.name === selectedState) || STATES[0]
-    const annualPT = stateData.pt
+
     const targetAnnualNet = targetInHand * 12
     let low = targetAnnualNet
-    let high = targetAnnualNet * 2.5
+    let high = targetAnnualNet * 3
     let ctc = (low + high) / 2
 
-    const getNet = (c: number) => {
-      const basic = c * 0.5
-      const employerPF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
-      const gross = c - employerPF
-      const employeePF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
-      const tax = calculateTax(gross, 'new').totalTax
-      return gross - employeePF - annualPT - tax
+    const getNet = (candidateCtc: number) => {
+      const breakdown = calculateSalaryBreakdown({
+        ctc: candidateCtc,
+        basicPercent,
+        variablePay,
+        isMetro,
+        stateName: selectedState,
+        pfMode,
+        taxRegime,
+        professionalTaxMode,
+        manualProfessionalTaxAnnual,
+      })
+      return breakdown.annualInHand
     }
 
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 30; i++) {
       ctc = (low + high) / 2
       const net = getNet(ctc)
       if (Math.abs(net - targetAnnualNet) < 100) break
-      if (net < targetAnnualNet) {
-        low = ctc
-      } else {
-        high = ctc
-      }
+      if (net < targetAnnualNet) low = ctc
+      else high = ctc
     }
 
-    const basic = ctc * 0.5
-    const employerPF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
-    const gross = ctc - employerPF
+    const breakdown = calculateSalaryBreakdown({
+      ctc,
+      basicPercent,
+      variablePay,
+      isMetro,
+      stateName: selectedState,
+      pfMode,
+      taxRegime,
+      professionalTaxMode,
+      manualProfessionalTaxAnnual,
+    })
 
     return {
       ctc,
-      tax: calculateTax(gross, 'new').totalTax,
-      pf: pfMode === 'capped' ? calcPF(basic) : basic * 0.12,
-      pt: annualPT,
+      tax: breakdown.annualTax,
+      pf: breakdown.annualEmployeePF,
+      pt: breakdown.annualPT,
     }
-  }, [targetValue, pfMode, selectedState, targetInHand])
+  }, [
+    targetValue,
+    pfMode,
+    selectedState,
+    targetInHand,
+    basicPercent,
+    variablePay,
+    isMetro,
+    taxRegime,
+    professionalTaxMode,
+    manualProfessionalTaxAnnual,
+  ])
 
   return (
     <div className="space-y-6 pb-24 pt-4">
       <h2 className="text-2xl font-bold">Reverse Calculator</h2>
-      <p className="text-secondary text-sm">
-        Calculate required CTC for your desired monthly in-hand salary.
-      </p>
+      <p className="text-secondary text-sm">Calculate required CTC for your desired monthly in-hand salary.</p>
 
-      {/* Inputs first */}
       <Card>
         <div className="space-y-5">
           <Input
@@ -95,29 +121,100 @@ export function ReverseCalculator() {
             <span>Advanced Options</span>
             <span className="text-base leading-none">{showAdvanced ? '−' : '+'}</span>
           </button>
+
           {!showAdvanced && (
             <p className="text-xs text-secondary -mt-1">
-              State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
+              {taxRegime === 'new' ? 'New' : 'Old'} regime · {isMetro ? 'Metro' : 'Non-Metro'} · State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
             </p>
           )}
+
           {showAdvanced && (
             <>
-              <Select
-                label="State"
-                value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
-                options={STATES.map((s) => ({ label: s.name, value: s.name }))}
-              />
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
-                <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
-                <Toggle
-                  value={pfMode === 'full'}
-                  onChange={(v) => setPfMode(v ? 'full' : 'capped')}
-                  leftLabel="₹1,800/mo"
-                  rightLabel="12% of basic"
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="Tax Regime"
+                  value={taxRegime}
+                  onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
+                  options={[
+                    { label: 'New Regime', value: 'new' },
+                    { label: 'Old Regime', value: 'old' },
+                  ]}
+                />
+                <Select
+                  label="State"
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
+                  options={STATES.map((s) => ({ label: s.name, value: s.name }))}
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="City Type"
+                  value={isMetro ? 'metro' : 'non-metro'}
+                  onChange={(e) => setIsMetro(e.target.value === 'metro')}
+                  options={[
+                    { label: 'Metro', value: 'metro' },
+                    { label: 'Non-Metro', value: 'non-metro' },
+                  ]}
+                />
+                <Input
+                  label="Basic Salary %"
+                  suffix="%"
+                  type="number"
+                  value={basicPercent}
+                  onChange={(e) => setBasicPercent(Number(e.target.value))}
+                  placeholder="40–60%"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Variable Pay (Annual)"
+                  prefix="₹"
+                  type="number"
+                  value={variablePay}
+                  onChange={(e) => setVariablePay(Number(e.target.value))}
+                />
+                <Select
+                  label="Professional Tax"
+                  value={professionalTaxMode}
+                  onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
+                  options={[
+                    { label: 'State estimate', value: 'state' },
+                    { label: 'Manual annual', value: 'manual' },
+                  ]}
+                />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
+                  <Toggle
+                    value={pfMode === 'full'}
+                    onChange={(v) => setPfMode(v ? 'full' : 'capped')}
+                    leftLabel="₹1,800/mo"
+                    rightLabel="12% of basic"
+                  />
+                </div>
+              </div>
+
+              {professionalTaxMode === 'manual' && (
+                <Input
+                  label="Professional Tax (Annual)"
+                  prefix="₹"
+                  type="text"
+                  inputMode="numeric"
+                  value={manualProfessionalTaxAnnualInput}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/[^0-9]/g, '')
+                    setManualProfessionalTaxAnnualInput(cleaned)
+                    setManualProfessionalTaxAnnual(Number(cleaned))
+                  }}
+                  onFocus={(e) => setManualProfessionalTaxAnnualInput(e.target.value.replace(/,/g, ''))}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value.replace(/,/g, ''))
+                    setManualProfessionalTaxAnnualInput(n > 0 ? formatNumber(n) : '')
+                  }}
+                />
+              )}
             </>
           )}
         </div>
@@ -134,23 +231,19 @@ export function ReverseCalculator() {
         result && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center py-6">
-              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em] mb-3">
-                You need a CTC of
-              </p>
+              <p className="text-secondary text-xs font-semibold uppercase tracking-[0.15em] mb-3">You need a CTC of</p>
               <DisplayAmount amount={result.ctc} size="hero" suffix="/yr" showWords />
             </div>
 
             <Card className="bg-bg-secondary border-transparent">
-              <h3 className="font-bold mb-3 text-sm">Estimated Deductions (New Regime)</h3>
+              <h3 className="font-bold mb-3 text-sm">Estimated Deductions ({taxRegime === 'new' ? 'New' : 'Old'} Regime)</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-secondary">Income Tax</span>
                   <span className="font-semibold">{formatIndianCurrency(result.tax)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-secondary">
-                    Provident Fund {pfMode === 'capped' ? '(statutory cap)' : '(12% of basic)'}
-                  </span>
+                  <span className="text-secondary">Provident Fund {pfMode === 'capped' ? '(statutory cap)' : '(12% of basic)'}</span>
                   <span className="font-semibold">{formatIndianCurrency(result.pf)}</span>
                 </div>
                 {result.pt > 0 && (

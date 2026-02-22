@@ -57,15 +57,19 @@ export const calculateTax = (
 
   tax = Math.max(0, tax - rebate)
 
-  // Marginal relief (new regime): tax must not exceed income above the ₹12L rebate threshold
-  // Prevents the cliff where earning ₹1 more causes ₹60k+ extra tax
+  let cess = tax * 0.04
+  let totalTax = tax + cess
+
+  // Marginal relief (new regime): total liability (including cess) should not
+  // exceed income above the ₹12L rebate threshold.
   if (regime === 'new' && taxableIncome > 1200000) {
     const excess = taxableIncome - 1200000
-    if (tax > excess) tax = excess
+    if (totalTax > excess) {
+      totalTax = excess
+      tax = totalTax / 1.04
+      cess = totalTax - tax
+    }
   }
-
-  const cess = tax * 0.04
-  const totalTax = tax + cess
 
   return { taxableIncome, tax, cess, totalTax, breakdown }
 }

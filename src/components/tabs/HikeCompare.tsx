@@ -5,9 +5,10 @@ import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
 import { DisplayAmount } from '../ui/DisplayAmount'
 import { formatIndianCurrency, formatNumber } from '../../utils/formatting'
-import { calculateTax, calcPF } from '../../utils/taxLogic'
 import { STATES } from '../../utils/constants'
 import { TrendingUp, ArrowRight } from 'lucide-react'
+import { calculateSalaryBreakdown, TaxRegime } from '../../utils/salaryLogic'
+import { ProfessionalTaxMode } from '../../utils/professionalTax'
 
 export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null; sharedCtc?: number }) {
   const initialCtc = sharedCtc || savedCtc || 0
@@ -17,9 +18,12 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   const [basicPercent, setBasicPercent] = useState<number>(50)
   const [selectedState, setSelectedState] = useState<string>('Maharashtra')
   const [pfMode, setPfMode] = useState<'capped' | 'full'>('capped')
+  const [taxRegime, setTaxRegime] = useState<TaxRegime>('new')
+  const [professionalTaxMode, setProfessionalTaxMode] = useState<ProfessionalTaxMode>('state')
+  const [manualProfessionalTaxAnnualInput, setManualProfessionalTaxAnnualInput] = useState<string>('')
+  const [manualProfessionalTaxAnnual, setManualProfessionalTaxAnnual] = useState<number>(0)
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
 
-  // Sync with shared CTC from Salary tab
   useEffect(() => {
     if (sharedCtc && sharedCtc > 0) {
       setCurrentCtc(sharedCtc)
@@ -28,14 +32,18 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
   }, [sharedCtc])
 
   const calcInHand = (ctc: number): number => {
-    const basic = ctc * (basicPercent / 100)
-    const employerPF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
-    const gross = ctc - employerPF
-    const employeePF = pfMode === 'capped' ? calcPF(basic) : basic * 0.12
-    const stateData = STATES.find((s) => s.name === selectedState) || STATES[0]
-    const pt = stateData.pt
-    const tax = calculateTax(gross, 'new').totalTax
-    return (gross - employeePF - pt - tax) / 12
+    const result = calculateSalaryBreakdown({
+      ctc,
+      basicPercent,
+      variablePay: 0,
+      isMetro: true,
+      stateName: selectedState,
+      pfMode,
+      taxRegime,
+      professionalTaxMode,
+      manualProfessionalTaxAnnual,
+    })
+    return result.monthlyInHand
   }
 
   const newCtc = currentCtc * (1 + hikePercent / 100)
@@ -47,7 +55,6 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
     <div className="space-y-6 pb-24 pt-4">
       <h2 className="text-2xl font-bold">Hike Calculator</h2>
 
-      {/* Inputs */}
       <Card>
         <div className="space-y-4">
           <Input
@@ -75,6 +82,7 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
             value={hikePercent}
             onChange={(e) => setHikePercent(Number(e.target.value))}
           />
+
           <button
             onClick={() => setShowAdvanced((v) => !v)}
             className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wide text-secondary pt-1"
@@ -84,18 +92,75 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
           </button>
           {!showAdvanced && (
             <p className="text-xs text-secondary -mt-1">
-              State: {selectedState} · PF: {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
+              {taxRegime === 'new' ? 'New' : 'Old'} regime · {selectedState} · PF: {pfMode === 'capped' ? '₹1,800/mo' : '12% of basic'}
               {pfMode === 'full' && ` · Basic: ${basicPercent}%`}
             </p>
           )}
+
           {showAdvanced && (
             <>
-              <Select
-                label="State"
-                value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
-                options={STATES.map((s) => ({ label: s.name, value: s.name }))}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="Tax Regime"
+                  value={taxRegime}
+                  onChange={(e) => setTaxRegime(e.target.value as TaxRegime)}
+                  options={[
+                    { label: 'New Regime', value: 'new' },
+                    { label: 'Old Regime', value: 'old' },
+                  ]}
+                />
+                <Select
+                  label="State"
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
+                  options={STATES.map((s) => ({ label: s.name, value: s.name }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="Professional Tax"
+                  value={professionalTaxMode}
+                  onChange={(e) => setProfessionalTaxMode(e.target.value as ProfessionalTaxMode)}
+                  options={[
+                    { label: 'State estimate', value: 'state' },
+                    { label: 'Manual annual', value: 'manual' },
+                  ]}
+                />
+                {pfMode === 'full' ? (
+                  <Input
+                    label="Basic Salary %"
+                    suffix="%"
+                    type="number"
+                    value={basicPercent}
+                    onChange={(e) => setBasicPercent(Number(e.target.value))}
+                    placeholder="40–60%"
+                  />
+                ) : (
+                  <div />
+                )}
+              </div>
+
+              {professionalTaxMode === 'manual' && (
+                <Input
+                  label="Professional Tax (Annual)"
+                  prefix="₹"
+                  type="text"
+                  inputMode="numeric"
+                  value={manualProfessionalTaxAnnualInput}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/[^0-9]/g, '')
+                    setManualProfessionalTaxAnnualInput(cleaned)
+                    setManualProfessionalTaxAnnual(Number(cleaned))
+                  }}
+                  onFocus={(e) => setManualProfessionalTaxAnnualInput(e.target.value.replace(/,/g, ''))}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value.replace(/,/g, ''))
+                    setManualProfessionalTaxAnnualInput(n > 0 ? formatNumber(n) : '')
+                  }}
+                />
+              )}
+
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-secondary mb-1">PF Calculation</p>
                 <p className="text-xs text-secondary mb-2">Most employers cap EPF at ₹1,800/month. Select '12% of basic' only if your offer letter specifies so.</p>
@@ -106,16 +171,6 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
                   rightLabel="12% of basic"
                 />
               </div>
-              {pfMode === 'full' && (
-                <Input
-                  label="Basic Salary %"
-                  suffix="%"
-                  type="number"
-                  value={basicPercent}
-                  onChange={(e) => setBasicPercent(Number(e.target.value))}
-                  placeholder="40–60%"
-                />
-              )}
             </>
           )}
         </div>
@@ -130,27 +185,20 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
         </div>
       ) : (
         <>
-          {/* Result card */}
           <div className="bg-black text-white rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-2 text-accent-green mb-5">
               <TrendingUp className="h-5 w-5" />
               <span className="font-bold text-xs uppercase tracking-[0.12em]">Projected Growth</span>
             </div>
 
-            {/* Hike Amount & Percentage */}
             <div className="mb-5 pb-5 border-b border-gray-800">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-2">Annual Hike</p>
               <div className="flex items-baseline gap-3">
-                <p className="text-2xl font-bold text-accent-green">
-                  +{formatIndianCurrency(newCtc - currentCtc)}
-                </p>
-                <p className="text-lg font-semibold text-gray-400">
-                  ({hikePercent}%)
-                </p>
+                <p className="text-2xl font-bold text-accent-green">+{formatIndianCurrency(newCtc - currentCtc)}</p>
+                <p className="text-lg font-semibold text-gray-400">({hikePercent}%)</p>
               </div>
             </div>
 
-            {/* Current → After Hike */}
             <div className="flex items-center gap-3 mb-5">
               <div className="flex-1">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">Current</p>
@@ -175,17 +223,14 @@ export function HikeCompare({ savedCtc, sharedCtc }: { savedCtc?: number | null;
             </div>
           </div>
 
-          {/* New Annual CTC */}
           <div className="text-center py-2">
-            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.12em] mb-2">
-              New Annual CTC
-            </p>
+            <p className="text-secondary text-xs font-semibold uppercase tracking-[0.12em] mb-2">New Annual CTC</p>
             <DisplayAmount amount={newCtc} size="md" showWords />
           </div>
 
           <div className="bg-bg-secondary p-4 rounded-xl">
             <p className="text-xs text-secondary text-center">
-              *Estimates based on New Tax Regime FY 2025-26. Actual in-hand may vary.
+              *Estimates based on {taxRegime === 'new' ? 'New' : 'Old'} Tax Regime FY 2025-26. Actual in-hand may vary.
             </p>
           </div>
         </>
