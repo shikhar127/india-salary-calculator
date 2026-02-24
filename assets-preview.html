@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SalaryFit — Play Store Assets</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f0f0;
+      padding: 48px 24px;
+      color: #111;
+    }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 48px; }
+    section { margin-bottom: 56px; }
+    h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-bottom: 16px; }
+    .spec { font-size: 12px; color: #999; margin-top: 10px; }
+    .row { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    button {
+      margin-top: 12px;
+      display: inline-block;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #333; }
+    .desc-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      max-width: 720px;
+    }
+    .desc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    .desc-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #333;
+      white-space: pre-wrap;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #fafafa;
+    }
+    .char-count {
+      font-size: 11px;
+      color: #999;
+      margin-top: 6px;
+      text-align: right;
+    }
+    .copy-btn {
+      margin-top: 8px;
+      background: #fff;
+      color: #111;
+      border: 1.5px solid #ddd;
+    }
+    .copy-btn:hover { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+
+  <h1>SalaryFit — Play Store Assets</h1>
+  <p class="subtitle">Right-click any asset → Save image as, or use the Download buttons below.</p>
+
+  <!-- ════════════════════════════════════════
+       APP ICON
+  ════════════════════════════════════════ -->
+  <section>
+    <h2>App Icon — 512 × 512 px</h2>
+    <div class="row">
+
+      <!-- Full size icon SVG -->
+      <div class="card">
+        <svg id="appIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="256" height="256">
+          <rect width="512" height="512" fill="#FFFFFF"/>
+          <circle cx="256" cy="256" r="245" fill="#C8973A"/>
+          <circle cx="256" cy="256" r="228" fill="#1C3461"/>
+          <clipPath id="iconClip">
+            <circle cx="256" cy="256" r="228"/>
+          </clipPath>
+          <g clip-path="url(#iconClip)">
+            <rect x="144" y="365" width="33" height="65"  fill="#5A9F58" rx="3"/>
+            <rect x="185" y="326" width="33" height="104" fill="#5A9F58" rx="3"/>
+            <rect x="226" y="282" width="33" height="148" fill="#5A9F58" rx="3"/>
+            <rect x="267" y="236" width="33" height="194" fill="#5A9F58" rx="3"/>
+            <line x1="128" y1="448" x2="324" y2="220"
+                  stroke="#C8973A" stroke-width="15" stroke-linecap="round"/>
+            <polygon points="356,192 342,227 322,208" fill="#C8973A"/>
+            <text x="233" y="260"
+                  font-family="'Arial Unicode MS','Noto Sans',Arial,Helvetica,sans-serif"
+                  font-size="270" font-weight="900"
+                  fill="#FFFFFF"
+                  text-anchor="middle" dominant-baseline="middle">₹</text>
+          </g>
+        </svg>
+        <p class="spec">512 × 512 · Recreated as vector SVG · No rounded corners (Play Store applies mask)</p>
+        <button onclick="downloadSVG('appIcon', 'salaryfit-icon-512.svg')">Download SVG</button>
+      </div>
+
+      <!-- Preview at device sizes -->
+      <div class="card">
+        <div style="display:flex; gap:20px; align-items:flex-end; flex-wrap:wrap;">
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="108" height="108" style="border-radius:24px; display:block;">
+              <rect width="512" height="512" fill="#FFFFFF"/>
+              <circle cx="256" cy="256" r="245" fill="#C8973A"/>
+              <circle cx="256" cy="256" r="228" fill="#1C3461"/>
+              <clipPath id="iconClip2"><circle cx="256" cy="256" r="228"/></clipPath>
+              <g clip-path="url(#iconClip2)">
+                <rect x="144" y="365" width="33" height="65"  fill="#5A9F58" rx="3"/>
+                <rect x="185" y="326" width="33" height="104" fill="#5A9F58" rx="3"/>
+                <rect x="226" y="282" width="33" height="148" fill="#5A9F58" rx="3"/>
+                <rect x="267" y="236" width="33" height="194" fill="#5A9F58" rx="3"/>
+                <line x1="128" y1="448" x2="324" y2="220" stroke="#C8973A" stroke-width="15" stroke-linecap="round"/>
+                <polygon points="356,192 342,227 322,208" fill="#C8973A"/>
+                <text x="233" y="260" font-family="'Arial Unicode MS','Noto Sans',Arial,sans-serif"
+                      font-size="270" font-weight="900" fill="#FFFFFF"
+                      text-anchor="middle" dominant-baseline="middle">₹</text>
+              </g>
+            </svg>
+            <p class="spec" style="margin-top:6px;">108 px</p>
+          </div>
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="72" height="72" style="border-radius:16px; display:block;">
+              <rect width="512" height="512" fill="#FFFFFF"/>
+              <circle cx="256" cy="256" r="245" fill="#C8973A"/>
+              <circle cx="256" cy="256" r="228" fill="#1C3461"/>
+              <clipPath id="iconClip3"><circle cx="256" cy="256" r="228"/></clipPath>
+              <g clip-path="url(#iconClip3)">
+                <rect x="144" y="365" width="33" height="65"  fill="#5A9F58" rx="3"/>
+                <rect x="185" y="326" width="33" height="104" fill="#5A9F58" rx="3"/>
+                <rect x="226" y="282" width="33" height="148" fill="#5A9F58" rx="3"/>
+                <rect x="267" y="236" width="33" height="194" fill="#5A9F58" rx="3"/>
+                <line x1="128" y1="448" x2="324" y2="220" stroke="#C8973A" stroke-width="15" stroke-linecap="round"/>
+                <polygon points="356,192 342,227 322,208" fill="#C8973A"/>
+                <text x="233" y="260" font-family="'Arial Unicode MS','Noto Sans',Arial,sans-serif"
+                      font-size="270" font-weight="900" fill="#FFFFFF"
+                      text-anchor="middle" dominant-baseline="middle">₹</text>
+              </g>
+            </svg>
+            <p class="spec" style="margin-top:6px;">72 px</p>
+          </div>
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="48" height="48" style="border-radius:10px; display:block;">
+              <rect width="512" height="512" fill="#FFFFFF"/>
+              <circle cx="256" cy="256" r="245" fill="#C8973A"/>
+              <circle cx="256" cy="256" r="228" fill="#1C3461"/>
+              <clipPath id="iconClip4"><circle cx="256" cy="256" r="228"/></clipPath>
+              <g clip-path="url(#iconClip4)">
+                <rect x="144" y="365" width="33" height="65"  fill="#5A9F58" rx="3"/>
+                <rect x="185" y="326" width="33" height="104" fill="#5A9F58" rx="3"/>
+                <rect x="226" y="282" width="33" height="148" fill="#5A9F58" rx="3"/>
+                <rect x="267" y="236" width="33" height="194" fill="#5A9F58" rx="3"/>
+                <line x1="128" y1="448" x2="324" y2="220" stroke="#C8973A" stroke-width="15" stroke-linecap="round"/>
+                <polygon points="356,192 342,227 322,208" fill="#C8973A"/>
+                <text x="233" y="260" font-family="'Arial Unicode MS','Noto Sans',Arial,sans-serif"
+                      font-size="270" font-weight="900" fill="#FFFFFF"
+                      text-anchor="middle" dominant-baseline="middle">₹</text>
+              </g>
+            </svg>
+            <p class="spec" style="margin-top:6px;">48 px</p>
+          </div>
+        </div>
+        <p class="spec" style="margin-top:16px;">Device size previews with Play Store squircle mask simulation</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       FEATURE GRAPHIC
+  ════════════════════════════════════════ -->
+  <section>
+    <h2>Feature Graphic — 1024 × 500 px</h2>
+    <div class="card" style="display: inline-block;">
+      <svg id="feature" width="1024" height="500" viewBox="0 0 1024 500" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Background gradient: deep navy left → near-black right -->
+        <defs>
+          <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#0D1F3C"/>
+            <stop offset="60%"  stop-color="#091428"/>
+            <stop offset="100%" stop-color="#060E1C"/>
+          </linearGradient>
+          <linearGradient id="glowGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#00D632" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="#00D632" stop-opacity="0"/>
+          </linearGradient>
+          <!-- Clip for icon circle in feature graphic -->
+          <clipPath id="fgIconClip">
+            <circle cx="820" cy="252" r="168"/>
+          </clipPath>
+        </defs>
+
+        <!-- Background -->
+        <rect width="1024" height="500" fill="url(#bgGrad)"/>
+
+        <!-- Subtle green glow wash in upper-left -->
+        <rect x="0" y="0" width="560" height="280" fill="url(#glowGrad)" opacity="0.7"/>
+
+        <!-- Green accent bar on left edge -->
+        <rect x="0" y="0" width="6" height="500" fill="#00D632"/>
+
+        <!-- ── LEFT: Text content ─────────────────────── -->
+
+        <!-- App name -->
+        <text x="56" y="192"
+              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
+              font-size="88" font-weight="900" fill="#FFFFFF" dominant-baseline="middle"
+              letter-spacing="-2">SalaryFit</text>
+
+        <!-- Tagline -->
+        <text x="58" y="262"
+              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
+              font-size="26" font-weight="400" fill="#8899BB" dominant-baseline="middle">
+          India Salary Calculator · FY 2025-26
+        </text>
+
+        <!-- Feature pill 1 -->
+        <rect x="58" y="305" width="218" height="38" rx="19" fill="#0A2A14"/>
+        <rect x="58" y="305" width="218" height="38" rx="19" fill="none" stroke="#00D632" stroke-width="1.5" opacity="0.7"/>
+        <text x="167" y="324"
+              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
+              font-size="15" font-weight="600" fill="#00D632"
+              text-anchor="middle" dominant-baseline="middle">New vs Old Tax Regime</text>
+
+        <!-- Feature pill 2 -->
+        <rect x="284" y="305" width="188" height="38" rx="19" fill="#0A2A14"/>
+        <rect x="284" y="305" width="188" height="38" rx="19" fill="none" stroke="#00D632" stroke-width="1.5" opacity="0.7"/>
+        <text x="378" y="324"
+              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
+              font-size="15" font-weight="600" fill="#00D632"
+              text-anchor="middle" dominant-baseline="middle">Hike &amp; Reverse Calc</text>
+
+        <!-- Feature pill 3 -->
+        <rect x="58" y="353" width="152" height="38" rx="19" fill="#1A1A0A"/>
+        <rect x="58" y="353" width="152" height="38" rx="19" fill="none" stroke="#C8973A" stroke-width="1.5" opacity="0.8"/>
+        <text x="134" y="372"
+              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
+              font-size="15" font-weight="700" fill="#C8973A"
+              text-anchor="middle" dominant-baseline="middle">FREE · NO ADS</text>
+
+        <!-- Feature pill 4 -->
+        <rect x="218" y="353" width="152" height="38" rx="19" fill="#0D1A2A"/>
+        <rect x="218" y="353" width="152" height="38" rx="19" fill="none" stroke="#8899BB" stroke-width="1.5" opacity="0.6"/>
+        <text x="294" y="372"
+              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
+              font-size="15" font-weight="600" fill="#8899BB"
+              text-anchor="middle" dominant-baseline="middle">Works Offline</text>
+
+        <!-- Divider line -->
+        <line x1="620" y1="40" x2="620" y2="460" stroke="#1E3050" stroke-width="1"/>
+
+        <!-- ── RIGHT: App icon ───────────────────────── -->
+
+        <!-- Outer glow behind icon -->
+        <circle cx="820" cy="252" r="196" fill="#C8973A" opacity="0.08"/>
+        <circle cx="820" cy="252" r="182" fill="#C8973A" opacity="0.10"/>
+
+        <!-- Gold ring -->
+        <circle cx="820" cy="252" r="172" fill="#C8973A"/>
+
+        <!-- Navy body -->
+        <circle cx="820" cy="252" r="158" fill="#1C3461"/>
+
+        <!-- Icon content clipped -->
+        <g clip-path="url(#fgIconClip)">
+          <!-- Scale factor: 158/228 ≈ 0.693. Translate to center 820,252 from 256,256 -->
+          <!-- Bars: original x/y relative to (256,256), scaled 0.693 -->
+          <!-- Bar 1: orig (144,365,33,65) → offset from center: (-112,109), scaled: (-77.6,75.5) → abs: (742,327.5) w=22.9 h=45 -->
+          <rect x="742" y="328" width="23" height="45"  fill="#5A9F58" rx="2"/>
+          <!-- Bar 2: orig (185,326,33,104) → offset: (-71,70) scaled: (-49.2,48.5) → abs: (771,300.5) w=22.9 h=72 -->
+          <rect x="771" y="301" width="23" height="72"  fill="#5A9F58" rx="2"/>
+          <!-- Bar 3: orig (226,282,33,148) → offset: (-30,26) scaled: (-20.8,18) → abs: (799,270) w=22.9 h=103 -->
+          <rect x="799" y="270" width="23" height="103" fill="#5A9F58" rx="2"/>
+          <!-- Bar 4: orig (267,236,33,194) → offset: (11,-20) scaled: (7.6,-13.9) → abs: (828,238) w=22.9 h=134 -->
+          <rect x="828" y="238" width="23" height="135" fill="#5A9F58" rx="2"/>
+
+          <!-- Arrow: orig line (128,448)→(324,220), tip (356,192) scaled 0.693 from center -->
+          <!-- Start: (128-256,448-256)=(-128,192) * 0.693 = (-88.7,133) + (820,252) = (731,385) -->
+          <!-- End:   (324-256,220-256)=(68,-36) * 0.693 = (47.1,-24.9) + (820,252) = (867,227) -->
+          <!-- Tip:   (356-256,192-256)=(100,-64) * 0.693 = (69.3,-44.3) + (820,252) = (889,208) -->
+          <line x1="731" y1="385" x2="863" y2="228"
+                stroke="#C8973A" stroke-width="10" stroke-linecap="round"/>
+          <!-- Arrowhead scaled: orig (342,227)→(86,-29)*0.693=(59.6,-20.1)+(820,252)=(880,232); orig (322,208)→(66,-48)*0.693=(45.7,-33.3)+(820,252)=(866,219) -->
+          <polygon points="889,208 880,232 866,219" fill="#C8973A"/>
+
+          <!-- Rupee: orig center (233,260), scaled: (233-256,260-256)=(-23,4)*0.693=(-15.9,2.8)+(820,252)=(804,255) -->
+          <!-- font-size scaled: 270*0.693=187 -->
+          <text x="804" y="255"
+                font-family="'Arial Unicode MS','Noto Sans',Arial,Helvetica,sans-serif"
+                font-size="187" font-weight="900"
+                fill="#FFFFFF"
+                text-anchor="middle" dominant-baseline="middle">₹</text>
+        </g>
+
+      </svg>
+      <p class="spec">1024 × 500 · Feature graphic for Play Store listing</p>
+      <button onclick="downloadSVG('feature', 'salaryfit-feature-graphic.svg')">Download SVG</button>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       PLAY STORE DESCRIPTIONS
+  ════════════════════════════════════════ -->
+  <section>
+    <h2>Play Store Descriptions</h2>
+    <div style="display:flex; flex-direction:column; gap:24px;">
+
+      <!-- Short description -->
+      <div class="desc-box">
+        <div class="desc-label">Short Description <span style="color:#bbb; font-weight:400;">(≤ 80 characters)</span></div>
+        <div class="desc-text" id="shortDesc">Calculate India take-home salary, compare tax regimes &amp; plan hikes. Free.</div>
+        <div class="char-count" id="shortCount"></div>
+        <button class="copy-btn" onclick="copyText('shortDesc')">Copy</button>
+      </div>
+
+      <!-- Full description -->
+      <div class="desc-box">
+        <div class="desc-label">Full Description <span style="color:#bbb; font-weight:400;">(≤ 4000 characters)</span></div>
+        <div class="desc-text" id="fullDesc">SalaryFit is the simplest, most complete salary calculator for India — built for FY 2025-26.
+
+Whether you're evaluating a job offer, planning a hike negotiation, or figuring out how much CTC you need for a target take-home — SalaryFit does it all, instantly and offline.
+
+──────────────────────────────
+WHAT YOU CAN DO
+──────────────────────────────
+
+▸ Calculate Take-Home Salary
+Enter your CTC and see your exact monthly in-hand salary. Breaks down Basic, HRA, PF, Professional Tax, and Income Tax under both New and Old regimes.
+
+▸ Compare New vs Old Tax Regime
+Side-by-side comparison of New Regime and Old Regime — with all major deductions (80C, 80D, HRA exemption, NPS, LTA) accounted for. Know exactly which regime saves you more and by how much.
+
+▸ Hike Projections
+See your new take-home after any salary hike — instantly. Compare your current and post-hike salary with accurate tax impact.
+
+▸ Reverse Calculator
+Working backwards: enter the monthly take-home you want, and SalaryFit tells you the CTC you need to negotiate.
+
+──────────────────────────────
+BUILT FOR INDIA
+──────────────────────────────
+
+• FY 2025-26 tax slabs (Budget 2025)
+• Standard deduction ₹75,000 under New Regime
+• Full Old Regime deduction support: 80C, 80D, HRA, NPS, LTA, and more
+• State-wise Professional Tax (Maharashtra, Karnataka, WB, and more)
+• Accurate Employee PF (12% of Basic, configurable)
+• Configurable Basic Salary % for precise CTC splitting
+
+──────────────────────────────
+COMPLETELY FREE
+──────────────────────────────
+
+• No ads — ever
+• No account or login required
+• Works fully offline
+• No data collected — all calculations happen on your device, nothing is sent anywhere
+
+Perfect for salaried professionals, HR teams, job seekers, and anyone navigating India's income tax system.</div>
+        <div class="char-count" id="fullCount"></div>
+        <button class="copy-btn" onclick="copyText('fullDesc')">Copy</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       HOW TO EXPORT PNG
+  ════════════════════════════════════════ -->
+  <section>
+    <h2>How to Export PNG</h2>
+    <div class="card" style="max-width: 560px;">
+      <p style="font-size:14px; line-height:1.8; color:#333;">
+        <strong>Option 1 — macOS Preview (easiest):</strong><br>
+        Download the SVG → Open in Preview → File → Export → PNG.<br>
+        Set width/height to exact pixel size required.<br><br>
+        <strong>Option 2 — Browser screenshot:</strong><br>
+        Right-click the SVG above → "Save image as" (saves SVG).<br>
+        Open in <strong>Inkscape</strong> (free) → Export PNG at exact size.<br><br>
+        <strong>Option 3 — Figma:</strong><br>
+        Copy the SVG source, paste into Figma, export as PNG at 1×.<br><br>
+        <strong>Play Store requirements:</strong><br>
+        · Icon: 512 × 512 px PNG, max 1 MB, no alpha required<br>
+        · Feature graphic: 1024 × 500 px PNG, max 1 MB<br>
+        · Screenshots: min 2, phone 9:16 ratio recommended
+      </p>
+    </div>
+  </section>
+
+  <script>
+    function downloadSVG(id, filename) {
+      const svg = document.getElementById(id);
+      // Set explicit dimensions for export
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+
+    function copyText(id) {
+      const el = document.getElementById(id);
+      const text = el.innerText || el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = el.nextElementSibling.nextElementSibling;
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = orig, 1800);
+      });
+    }
+
+    function updateCounts() {
+      const short = document.getElementById('shortDesc');
+      const full = document.getElementById('fullDesc');
+      const sc = document.getElementById('shortCount');
+      const fc = document.getElementById('fullCount');
+      const sLen = (short.innerText || short.textContent).length;
+      const fLen = (full.innerText || full.textContent).length;
+      sc.textContent = sLen + ' / 80 characters' + (sLen > 80 ? ' ⚠ over limit' : '');
+      fc.textContent = fLen + ' / 4000 characters' + (fLen > 4000 ? ' ⚠ over limit' : '');
+    }
+    updateCounts();
+  </script>
+
+</body>
+</html>

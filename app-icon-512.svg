@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- White background (Play Store applies its own shape mask) -->
+  <rect width="512" height="512" fill="#FFFFFF"/>
+
+  <!-- Gold outer ring -->
+  <circle cx="256" cy="256" r="245" fill="#C8973A"/>
+
+  <!-- Dark navy body -->
+  <circle cx="256" cy="256" r="228" fill="#1C3461"/>
+
+  <clipPath id="iconClip">
+    <circle cx="256" cy="256" r="228"/>
+  </clipPath>
+
+  <g clip-path="url(#iconClip)">
+    <!-- Ascending bar chart (4 bars, lower area, behind rupee symbol) -->
+    <rect x="144" y="365" width="33" height="65"  fill="#5A9F58" rx="3"/>
+    <rect x="185" y="326" width="33" height="104" fill="#5A9F58" rx="3"/>
+    <rect x="226" y="282" width="33" height="148" fill="#5A9F58" rx="3"/>
+    <rect x="267" y="236" width="33" height="194" fill="#5A9F58" rx="3"/>
+
+    <!-- Gold trending arrow: line + arrowhead -->
+    <!-- Line from lower-left to just before tip -->
+    <line x1="128" y1="448" x2="324" y2="220"
+          stroke="#C8973A" stroke-width="15" stroke-linecap="round"/>
+    <!-- Arrowhead tip at (356, 192)
+         Direction (0.668, -0.744), perpendicular (0.744, 0.668)
+         Back 34px: (332, 217), wings ±14px: (342,227) and (322,208) -->
+    <polygon points="356,192 342,227 322,208" fill="#C8973A"/>
+
+    <!-- Rupee symbol: large, white, centered -->
+    <text x="233" y="260"
+          font-family="'Arial Unicode MS','Noto Sans',Arial,Helvetica,sans-serif"
+          font-size="270" font-weight="900"
+          fill="#FFFFFF"
+          text-anchor="middle" dominant-baseline="middle">₹</text>
+  </g>
+</svg>
